@@ -2,8 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   navItems,
   profile,
@@ -84,89 +84,83 @@ function subscribeToThemeChange(callback: () => void) {
 }
 
 export function PortfolioShell() {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const theme = useSyncExternalStore(subscribeToThemeChange, readThemeSnapshot, () => "light");
-  const [activeFileViewer, setActiveFileViewer] = useState<{
-    title: string;
-    href: string;
-  } | null>(null);
-
-  const selectedItem: SelectedItem = useMemo(() => {
-    const type = searchParams.get("type");
-    const item = searchParams.get("item");
-
-    if ((type === "project" || type === "timeline") && item) {
-      return { type, slug: item };
-    }
-
-    return null;
-  }, [searchParams]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
+  const [activeFileViewer, setActiveFileViewer] = useState<{
+    title: string;
+    href: string;
+  } | null>(null);
+
+  // Local state drives the modal UI. URL is updated silently via replaceState
+  // to avoid Next.js production router scroll side-effects entirely.
+  const [activeModal, setActiveModal] = useState<SelectedItem>(null);
+  const modalScrollRef = useRef<HTMLDivElement>(null);
+
+  // On mount (or hard reload), seed local state from URL
+  useEffect(() => {
+    const type = searchParams.get("type");
+    const item = searchParams.get("item");
+    if ((type === "project" || type === "timeline") && item) {
+      setActiveModal({ type: type as ModalType, slug: item });
+    }
+    // Only run on mount — after that, local state is the source of truth
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reset modal scroll to top whenever the item changes
+  useEffect(() => {
+    if (activeModal && modalScrollRef.current) {
+      modalScrollRef.current.scrollTop = 0;
+    }
+  }, [activeModal]);
 
   const currentItem = useMemo(() => {
-    if (!selectedItem) {
-      return null;
+    if (!activeModal) return null;
+    if (activeModal.type === "project") {
+      return projectItems.find((p) => p.slug === activeModal.slug) ?? null;
     }
+    return timelineItems.find((e) => e.slug === activeModal.slug) ?? null;
+  }, [activeModal]);
 
-    if (selectedItem.type === "project") {
-      return projectItems.find((project) => project.slug === selectedItem.slug) ?? null;
-    }
-
-    return timelineItems.find((entry) => entry.slug === selectedItem.slug) ?? null;
-  }, [selectedItem]);
-
+  // Scroll-lock body when any overlay is open
   useEffect(() => {
-    const shouldLockScroll = Boolean(activeFileViewer || currentItem);
-
-    if (!shouldLockScroll) {
-      return;
-    }
-
-    const originalBodyOverflow = document.body.style.overflow;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    const originalScrollBehavior = document.documentElement.style.scrollBehavior;
-    const originalScrollRestoration = window.history.scrollRestoration;
-
-    // Prevent scroll restoration jump
-    if ("scrollRestoration" in window.history) {
-      window.history.scrollRestoration = "manual";
-    }
-
+    if (!activeFileViewer && !currentItem) return;
+    const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    document.documentElement.style.scrollBehavior = "auto";
-
-    return () => {
-      document.body.style.overflow = originalBodyOverflow;
-      document.documentElement.style.overflow = originalHtmlOverflow;
-      document.documentElement.style.scrollBehavior = originalScrollBehavior;
-      if ("scrollRestoration" in window.history) {
-        window.history.scrollRestoration = originalScrollRestoration;
-      }
-    };
+    return () => { document.body.style.overflow = prev; };
   }, [activeFileViewer, currentItem]);
 
+  // Silently sync URL with modal state (no router, no scroll side-effects)
+  const syncUrl = (modal: SelectedItem) => {
+    const url = new URL(window.location.href);
+    if (modal) {
+      url.searchParams.set("type", modal.type);
+      url.searchParams.set("item", modal.slug);
+    } else {
+      url.searchParams.delete("type");
+      url.searchParams.delete("item");
+    }
+    window.history.replaceState(window.history.state, "", url.toString());
+  };
 
+  const openItem = (type: ModalType, slug: string) => {
+    const next = { type, slug };
+    setActiveModal(next);
+    syncUrl(next);
+  };
 
   const closeModal = () => {
-    router.replace(pathname, { scroll: false });
+    setActiveModal(null);
+    syncUrl(null);
   };
 
   const closeFileViewer = () => {
     setActiveFileViewer(null);
-  };
-
-  const openItem = (type: ModalType, slug: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("type", type);
-    params.set("item", slug);
-    router.push(`?${params.toString()}`, { scroll: false });
   };
 
   const updateTheme = (nextTheme: "light" | "dark") => {
@@ -175,6 +169,18 @@ export function PortfolioShell() {
   };
 
   const [activeSection, setActiveSection] = useState("");
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const updateScrollState = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    updateScrollState();
+    window.addEventListener("scroll", updateScrollState, { passive: true });
+
+    return () => window.removeEventListener("scroll", updateScrollState);
+  }, []);
 
   useEffect(() => {
     const observerOptions = {
@@ -199,8 +205,8 @@ export function PortfolioShell() {
     return () => observer.disconnect();
   }, []);
 
-  const currentProject = selectedItem?.type === "project" ? (currentItem as ProjectItem | null) : null;
-  const currentTimeline = selectedItem?.type === "timeline" ? (currentItem as TimelineItem | null) : null;
+  const currentProject = activeModal?.type === "project" ? (currentItem as ProjectItem | null) : null;
+  const currentTimeline = activeModal?.type === "timeline" ? (currentItem as TimelineItem | null) : null;
   const currentProjectFiles = currentProject?.files ?? [];
 
   return (
@@ -208,7 +214,13 @@ export function PortfolioShell() {
       <div className="pointer-events-none absolute inset-0 bg-[var(--bg-gradient)]" />
 
       <div className="relative mx-auto flex w-full max-w-[1344px] flex-col px-5 pb-32 pt-5 sm:px-8 lg:px-10">
-        <header className="sticky top-4 z-30 mb-10 rounded-2xl border border-[var(--border)] bg-[color:var(--surface)]/90 px-4 py-3 shadow-[var(--shadow)] backdrop-blur-xl">
+        <header
+          className={`sticky top-4 z-30 mb-10 rounded-2xl border border-[var(--border)] px-4 py-3 shadow-[var(--shadow)] transition-all duration-300 ${
+            isScrolled
+              ? "bg-[color:var(--surface)]/72 backdrop-blur-2xl backdrop-saturate-150"
+              : "bg-[color:var(--surface)]/92 backdrop-blur-xl"
+          }`}
+        >
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-lg font-semibold tracking-tight">{profile.name}</h1>
@@ -300,6 +312,27 @@ export function PortfolioShell() {
               </div>
             </motion.div>
           </section>
+
+          <SectionBlock id="skills" title="Skills">
+            <div className="grid gap-4 md:grid-cols-3">
+              {skillGroups.map((group, index) => (
+                <Card key={group.title} delay={index * 0.08}>
+                  <h3 className="text-xl font-semibold">{group.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{group.description}</p>
+                  <div className="mt-5 flex flex-wrap gap-2 pt-2 border-t border-[var(--border)]">
+                    {group.items.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-md bg-[color:var(--surface-elevated)] border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground)] transition-colors hover:bg-[var(--accent)] hover:text-white"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </SectionBlock>
 
           <SectionBlock id="education" title="Education">
             <div className="space-y-3">
@@ -434,39 +467,20 @@ export function PortfolioShell() {
             </div>
           </SectionBlock>
 
-          <SectionBlock id="skills" title="Skills">
-            <div className="grid gap-4 md:grid-cols-3">
-              {skillGroups.map((group, index) => (
-                <Card key={group.title} delay={index * 0.08}>
-                  <h3 className="text-xl font-semibold">{group.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{group.description}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {group.items.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-lg border border-[var(--border)] bg-[color:var(--surface-elevated)] px-3 py-1 text-xs font-medium text-[var(--foreground)]"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </SectionBlock>
-
           <SectionBlock id="contact" title="Contact">
             <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
               <Card>
                 <h3 className="text-2xl font-semibold">Let’s connect</h3>
                 <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                  This section stays intentionally lightweight in v1: a direct email link and social profiles, with no send backend needed.
+                  I&apos;m always open to discussing new opportunities, collaborations, or talking about data and tech. Feel free to reach out via email or connect with me on LinkedIn and GitHub.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   {socialLinks.map((link) => (
                     <a
                       key={link.label}
                       href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm transition hover:bg-[color:var(--surface-elevated)]"
                     >
                       {link.label}
@@ -477,7 +491,7 @@ export function PortfolioShell() {
               <Card>
                 <p className="text-sm uppercase tracking-[0.22em] text-[var(--muted)]">Location</p>
                 <p className="mt-3 text-lg font-medium">{profile.location}</p>
-                <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Tailored for recruiters scanning for skills, work history, and project depth.</p>
+                <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Originally from Campinas, Brazil, and now based in Canada.</p>
               </Card>
             </div>
           </SectionBlock>
@@ -552,7 +566,10 @@ export function PortfolioShell() {
               </div>
               <div className="mt-6 border-t border-[var(--border)]" />
 
-              <div className="mt-6 max-h-[60vh] overflow-y-auto pr-3 text-sm leading-6 text-[var(--muted)]">
+              <div 
+                ref={modalScrollRef}
+                className="mt-6 max-h-[60vh] overflow-y-auto pr-3 text-sm leading-6 text-[var(--muted)]"
+              >
                 {(() => {
                   const blocks: any[] = [];
                   let currentBlock: any = null;
@@ -579,7 +596,7 @@ export function PortfolioShell() {
                     const nextB = blocks[i + 1];
 
                     const isGridable = (label: string) => 
-                      selectedItem?.type === "timeline" && label && label.toLowerCase() !== "overview";
+                      activeModal?.type === "timeline" && label && label.toLowerCase() !== "overview";
 
                     if (isGridable(b.label) && isGridable(nextB?.label)) {
                       renderedBlocks.push(
@@ -615,7 +632,7 @@ export function PortfolioShell() {
                                 {b.value}
                               </p>
                             )}
-                            <div className={(selectedItem?.type === "project" || !b.label || b.label.toLowerCase() === "overview") ? "space-y-4" : "space-y-0.5"}>
+                            <div className={(activeModal?.type === "project" || !b.label || b.label.toLowerCase() === "overview") ? "space-y-4" : "space-y-0.5"}>
                               {b.items.map((item: string, idx: number) => (
                                 <p key={idx} className={item.trim().startsWith("•") ? "pl-5 -indent-5" : ""}>
                                   {item}

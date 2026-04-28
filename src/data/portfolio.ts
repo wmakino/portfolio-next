@@ -54,34 +54,34 @@ export const profile = {
 };
 
 export const socialLinks: SocialLink[] = [
-  { label: "GitHub", href: "https://github.com/" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/" },
-  { label: "Email", href: "mailto:hello@example.com" },
+  { label: "GitHub", href: "https://github.com/wmakino" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/wmakino/" },
+  { label: "Email", href: "mailto:wmakino@outlook.com" },
 ];
 
 export const navItems = [
+  { label: "Skills", id: "skills" },
   { label: "Education", id: "education" },
   { label: "Projects", id: "projects" },
   { label: "Work", id: "work" },
-  { label: "Skills", id: "skills" },
   { label: "Contact", id: "contact" },
 ];
 
 export const skillGroups: SkillGroup[] = [
   {
-    title: "Analytics",
-    description: "Tools and workflows for analysis, reporting, and decision support.",
-    items: ["SQL", "Excel", "Power BI", "Tableau", "A/B Testing", "Statistics"],
+    title: "Machine Learning & AI",
+    description: "Building, tuning and deploying predictive models and intelligent systems.",
+    items: ["Python", "Scikit-Learn", "PyTorch", "Pandas", "NLP", "Computer Vision", "LLMs"],
   },
   {
-    title: "Machine Learning",
-    description: "Modeling and experimentation for data science prototypes and studies.",
-    items: ["Python", "Pandas", "NumPy", "scikit-learn", "PyTorch", "Jupyter"],
+    title: "Data Analytics & Strategy",
+    description: "Extracting insights through statistical analysis and business intelligence workflows.",
+    items: ["SQL", "Tableau", "Power BI", "Excel", "Statistics", "Predictive Analytics"],
   },
   {
-    title: "Product + Ops",
-    description: "Cross-functional work that connects business context with technical execution.",
-    items: ["Requirements", "Documentation", "Stakeholder Communication", "Process Design"],
+    title: "Software & Cloud",
+    description: "Developing production-ready web applications, APIs, and scalable architectures.",
+    items: ["Flask", "React", "Next.js", "HTML/CSS", "Git", "Cloud Computing", "System Integration"],
   },
 ];
 
