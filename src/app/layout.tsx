@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "William Makino",
   description: "Artificial Intelligence, Data Science and Economics portfolio built with Next.js, Tailwind CSS, and Framer Motion.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

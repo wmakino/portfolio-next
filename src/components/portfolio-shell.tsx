@@ -28,6 +28,7 @@ const pageVariants = {
 };
 
 const themeStorageKey = "portfolio-theme";
+const themeMediaQuery = "(prefers-color-scheme: dark)";
 
 function getFileIcon(href: string) {
   const h = href.toLowerCase();
@@ -69,17 +70,31 @@ function readThemeSnapshot() {
     return storedTheme;
   }
 
-  return "light" as const;
+  return window.matchMedia(themeMediaQuery).matches ? "dark" : "light";
 }
 
 function subscribeToThemeChange(callback: () => void) {
   const handleStorage = () => callback();
+  const mediaQuery = window.matchMedia(themeMediaQuery);
+  const handleMediaChange = () => callback();
+  const supportsMediaQueryListener = typeof mediaQuery.addEventListener === "function";
+
   window.addEventListener("storage", handleStorage);
   window.addEventListener("portfolio-theme-change", handleStorage);
+  if (supportsMediaQueryListener) {
+    mediaQuery.addEventListener("change", handleMediaChange);
+  } else {
+    mediaQuery.addListener(handleMediaChange);
+  }
 
   return () => {
     window.removeEventListener("storage", handleStorage);
     window.removeEventListener("portfolio-theme-change", handleStorage);
+    if (supportsMediaQueryListener) {
+      mediaQuery.removeEventListener("change", handleMediaChange);
+    } else {
+      mediaQuery.removeListener(handleMediaChange);
+    }
   };
 }
 
@@ -183,26 +198,47 @@ export function PortfolioShell() {
   }, []);
 
   useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: "-45% 0px -45% 0px",
-      threshold: 0,
+    const updateActiveSection = () => {
+      const documentHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+      const maxScroll = Math.max(1, documentHeight - window.innerHeight);
+      const scrollProgress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+
+      if (window.scrollY + window.innerHeight >= documentHeight - 2) {
+        setActiveSection(navItems[navItems.length - 1]?.id ?? "");
+        return;
+      }
+
+      let nextActiveSection = navItems[0]?.id ?? "";
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      for (const item of navItems) {
+        const element = document.getElementById(item.id);
+        if (!element) continue;
+
+        const rect = element.getBoundingClientRect();
+        const sectionProgress = Math.min(
+          1,
+          Math.max(0, (rect.top + window.scrollY + rect.height * 0.5 - window.innerHeight * 0.34) / maxScroll),
+        );
+        const distance = Math.abs(sectionProgress - scrollProgress);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          nextActiveSection = item.id;
+        }
+      }
+
+      setActiveSection(nextActiveSection);
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActiveSection(entry.target.id);
-        }
-      });
-    }, observerOptions);
+    updateActiveSection();
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    window.addEventListener("resize", updateActiveSection);
 
-    navItems.forEach((item) => {
-      const element = document.getElementById(item.id);
-      if (element) observer.observe(element);
-    });
-
-    return () => observer.disconnect();
+    return () => {
+      window.removeEventListener("scroll", updateActiveSection);
+      window.removeEventListener("resize", updateActiveSection);
+    };
   }, []);
 
   const currentProject = activeModal?.type === "project" ? (currentItem as ProjectItem | null) : null;
@@ -215,19 +251,19 @@ export function PortfolioShell() {
 
       <div className="relative mx-auto flex w-full max-w-[1344px] flex-col px-5 pb-32 pt-5 sm:px-8 lg:px-10">
         <header
-          className={`sticky top-4 z-30 mb-10 rounded-2xl border border-[var(--border)] px-4 py-3 shadow-[var(--shadow)] transition-all duration-300 ${
+          className={`sticky top-4 z-30 mb-14 rounded-2xl border border-[var(--border)] px-4 py-4 shadow-[var(--shadow)] transition-all duration-300 ${
             isScrolled
               ? "bg-[color:var(--surface)]/72 backdrop-blur-2xl backdrop-saturate-150"
               : "bg-[color:var(--surface)]/92 backdrop-blur-xl"
           }`}
         >
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-8">
             <div>
               <h1 className="text-lg font-semibold tracking-tight">{profile.name}</h1>
               <p className="text-xs uppercase tracking-[0.28em] text-[var(--accent)]">Portfolio</p>
             </div>
 
-            <nav className="flex flex-wrap items-center gap-2 text-sm text-[var(--muted)]">
+            <nav className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[var(--muted)] md:mt-0">
               {navItems.map((item) => (
                 <a
                   key={item.id}

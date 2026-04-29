@@ -1,0 +1,25 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WM favicon">
+  <defs>
+    <linearGradient id="bg" x1="10" y1="8" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB" />
+      <stop offset="1" stop-color="#1D4ED8" />
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="64" height="64" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="1" stdDeviation="0.8" flood-color="#0F172A" flood-opacity="0.28" />
+    </filter>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#bg)" />
+  <rect x="10" y="10" width="44" height="44" rx="12" fill="#0F172A" fill-opacity="0.16" />
+  <g filter="url(#shadow)">
+    <text
+      x="32"
+      y="39"
+      text-anchor="middle"
+      fill="#F8FAFC"
+      style="font: 800 28px Arial, Helvetica, sans-serif; letter-spacing: -2px;"
+      text-rendering="geometricPrecision"
+    >
+      WM
+    </text>
+  </g>
+</svg>

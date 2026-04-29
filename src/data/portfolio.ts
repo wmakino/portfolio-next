@@ -1,5 +1,16 @@
 
 
+import type { StaticImageData } from "next/image";
+
+import creditRiskThumbnail from "../../public/images/thumbnails/credit-risk.png";
+import aiGradingThumbnail from "../../public/images/thumbnails/ai-grading.png";
+import canadaEvThumbnail from "../../public/images/thumbnails/canada-ev.png";
+import f1Thumbnail from "../../public/images/thumbnails/f1-season.png";
+import nycRideshareThumbnail from "../../public/images/thumbnails/nyc-rideshare.png";
+import monographThumbnail from "../../public/images/thumbnails/monograph.png";
+import fortuneThumbnail from "../../public/images/thumbnails/fortune-1000.png";
+import covidImpactThumbnail from "../../public/images/thumbnails/covid-impact.png";
+
 export type SocialLink = {
   label: string;
   href: string;
@@ -33,7 +44,7 @@ export type ProjectItem = {
   slug: string;
   title: string;
   category: string;
-  imageSrc: string;
+  imageSrc: StaticImageData;
   summary: string;
   details: string[];
   tags: string[];
@@ -286,7 +297,7 @@ export const projectItems: ProjectItem[] = [
     slug: "credit-risk-analysis",
     title: "Credit Risk Analysis & Deployment",
     category: "DATA-440 & ARTI-404 Final Project",
-    imageSrc: "/projects/credit_risk/credit_risk_thumbnail.png",
+    imageSrc: creditRiskThumbnail,
     summary: "End-to-end credit risk assessment system combining advanced machine learning modeling with a production-ready web interface.",
     details: [
       "Machine Learning (DATA-440): Developed a robust predictive model for credit risk assessment, including comprehensive Exploratory Data Analysis (EDA) and rigorous hyperparameter tuning to optimize classification accuracy.",
@@ -303,10 +314,28 @@ export const projectItems: ProjectItem[] = [
     ],
   },
   {
+    slug: "ai-grading-system",
+    title: "Human-Centered AI Grading",
+    category: "ARTI-406 Final Project",
+    imageSrc: aiGradingThumbnail,
+    summary: "Human-centered AI grading assistant designed to reduce instructor workload while preserving transparency, control, and academic oversight.",
+    details: [
+      "Project Scope: Designed an end-to-end concept for an AI-powered grading assistant tailored specifically to educational environments. Rather than attempting to automate grading entirely—which introduces significant ethical and pedagogical risks—this project focused on a human-centered design approach. The overarching goal was to drastically reduce the administrative burden of grading while keeping instructors firmly in the loop as the final decision-makers.",
+      "Workflow & UX Design: Developed a robust, rubric-first grading flow accessible via an interactive web-based mockup. The system allows educators to define custom scoring criteria and adjust the AI's strictness levels (e.g., 'strict', 'medium', 'lenient'). By automatically matching student submissions against these parameters, the system generates baseline scores and proposes structured, constructive feedback that the instructor can review, tweak, or accept.",
+      "Human-In-The-Loop Iteration: The development lifecycle relied heavily on UX research and iterative instructor feedback. Initial concepts were refined to eliminate confusing AI black boxes, leading to a transparent interface where every AI-generated suggestion includes a clear rationale linking back to the rubric. This significantly reduced manual data entry while fostering trust in the algorithm's outputs.",
+      "Ethical Considerations & Privacy: Tackled the inherent biases and privacy concerns of using LLMs in academic evaluation. The architecture conceptually isolates student data to remain compliant with privacy standards, while the UI forces an active 'approve' step to prevent automation bias. The project reinforces long-term governance strategies to ensure the tool remains equitable and mathematically sound across diverse student cohorts.",
+    ],
+    tags: ["Human-Centered AI", "UX Research", "Transparency", "Ethics"],
+    files: [
+      { label: "Final Report", href: "/projects/ai_grading/Final Project Report.pdf", icon: "file" },
+      { label: "Interactive Mockup", href: "/projects/ai_grading/ai-grading-system_v3.html", icon: "code" },
+    ],
+  },
+  {
     slug: "capcon-ev-analysis",
     title: "Canada EV Infrastructure",
     category: "Data Analytics Capstone",
-    imageSrc: "/projects/canada-ev-infrastructure/thumbnail.png",
+    imageSrc: canadaEvThumbnail,
     summary: "Data Analytics Capstone on Canada's EV charging network and federal investment strategy.",
     details: [
       "This capstone project was an academic simulation of a consulting engagement for Natural Resources Canada (NRCan). The goal was to build a data-driven decision-support tool to optimize federal electric vehicle infrastructure allocation. The core focus was architecting an end-to-end analytical pipeline using spatial data, stochastic simulations, and predictive modeling.",
@@ -327,12 +356,13 @@ export const projectItems: ProjectItem[] = [
     slug: "daan-statistical-analysis",
     title: "2024 F1 Season Analysis",
     category: "DATA-415 Final Project",
-    imageSrc: "/projects/f1-analysis/thumbnail.png",
+    imageSrc: f1Thumbnail,
     summary: "Advanced performance modeling of the 2024 Formula 1 season using stochastic simulations and predictive techniques in Excel.",
     details: [
-      "Stochastic Modeling: Implemented a Monte Carlo simulation engine to forecast race outcomes and championship standings across multiple probability-weighted scenarios.",
-      "Predictive Analytics: Built k-Nearest Neighbors (kNN) and Linear Regression models to evaluate driver performance consistency and vehicle pace efficiency.",
-      "Data Synthesis: Streamlined high-frequency telemetry and race data from the OpenF1 API into a robust analytical dashboard for scenario-based decision support.",
+      "Project Goal: Leveraged high-frequency telemetry, historic tire degradation statistics, and pitstop intervals from the OpenF1 API into actionable driver forecasts for both the Drivers' and Constructors' F1 championships.",
+      "Predictive Modeling: Developed a suite of predictive models to analyze race dynamics. This included building k-Nearest Neighbors (kNN) algorithms to classify driver performance brackets and linear regression frameworks to quantify the exact pace efficiency of different vehicle setups across varied track conditions.",
+      "Stochastic Simulations: Recognizing the inherent volatility in F1 racing—where weather, crashes, and mechanical failures routinely disrupt linear predictions—a robust Monte Carlo simulation engine was constructed. By running thousands of probability-weighted race scenarios, the system provided a statistical confidence interval for final points standings rather than fragile deterministic outcomes.",
+      "Business Intelligence Synthesis: Consolidated the output of the predictive models and stochastic simulations into a unified analytical dashboard. This comprehensive tool allows for dynamic scenario testing across the season, simulating the high-pressure data environments utilized by professional trackside strategists.",
     ],
     tags: ["Excel", "Monte Carlo", "kNN", "Linear Regression", "Scenario Forecasting"],
     files: [{ label: "Project Report", href: "/projects/f1-analysis/report.pdf", icon: "file" }],
@@ -341,21 +371,22 @@ export const projectItems: ProjectItem[] = [
     slug: "daan-predictive-analytics",
     title: "NYC Rideshare Trips",
     category: "DATA-420 Final Project",
-    imageSrc: "/projects/nyc-rideshare/thumbnail.png",
+    imageSrc: nycRideshareThumbnail,
     summary: "Comprehensive demand analysis and passenger clustering of New York City rideshare data using R.",
     details: [
-      "Unsupervised Learning: Developed k-means clustering models to segment high-intensity trip zones and identify peak demand patterns across the five boroughs.",
-      "Predictive Modeling: Architected classification decision trees and linear regression workflows to surface the key drivers of trip duration and fare volatility.",
-      "Statistical Analysis: Performed rigorous exploratory data analysis (EDA) and feature importance ranking to optimize driver allocation strategies.",
+      "Objective: Addressed the complex challenge of urban mobility by conducting a deep-dive predictive analysis on a massive dataset of continuous New York City rideshare trips. The project focused on understanding fare volatility, trip durations, and spatial demand patterns to mathematically optimize driver positioning across the five boroughs.",
+      "Exploratory Data Analysis: Executed a rigorous exploratory data analysis phase using R, handling missing values, identifying multi-borough outliers in fare data, and visualizing spatial-temporal trends. This foundational step surfaced crucial feature importance, distinguishing the driving forces of trip demand in a highly chaotic dataset.",
+      "Unsupervised Machine Learning: Developed and deployed k-means clustering algorithms to segment geographic zones based on high-intensity trip origins and destinations. By mathematically quantifying these hotspots, the analysis provided actionable insights into where and when fleets should be deployed to minimize passenger wait times and maximize ride utilization.",
+      "Supervised Predictive Workflows: Architected robust supervised learning pipelines, including classification decision trees and multivariate linear regression models. These advanced statistics were fine-tuned to predict exact trip durations and expected fares based on time of day and external traffic variables, ultimately culminating in an intricate technical report.",
     ],
     tags: ["R", "k-Means Clustering", "Decision Trees", "Regression", "Exploratory Data Analysis"],
-    files: [{ label: "Project Report", href: "/projects/nyc-rideshare/report.html", icon: "code" }],
+    files: [{ label: "Project Report", href: "/projects/nyc-rideshare/Final-Project.pdf", icon: "file" }],
   },
   {
     slug: "monograph-capstone",
     title: "Monetary Financing & COVID-19",
     category: "CE-825 Final Project",
-    imageSrc: "/projects/monograph/monograph_thumbnail_v2.png",
+    imageSrc: monographThumbnail,
     summary: "Year-long Economics capstone analyzing Brazil's pandemic-era monetary financing and macroeconomic theory.",
     details: [
       "Capstone Scope: Developed over a full academic year, this monograph represents the culmination of the Bachelor's in Economics, merging high-level macroeconomic theory with qualitative empirical validation.",
@@ -373,12 +404,13 @@ export const projectItems: ProjectItem[] = [
     slug: "fortune-1000",
     title: "2024 Fortune 1000 Companies",
     category: "CE-874 Final Project",
-    imageSrc: "/projects/fortune-1000/thumbnail.png",
+    imageSrc: fortuneThumbnail,
     summary: "Multi-model machine learning pipeline to forecast revenue growth and market ranking shifts for Fortune 1000 companies.",
     details: [
-      "Ensemble Methods: Developed and optimized a suite of models including Random Forest, SVR, and Multi-layer Perceptrons (MLP) to predict annual fiscal performance.",
-      "Hyperparameter Tuning: Utilized grid search and cross-validation techniques in Python to maximize model accuracy across disparate industry sectors.",
-      "Collaborative Development: Led the technical integration of model outputs within a multidisciplinary team of 4, ensuring unified data conforming and error diagnostics.",
+      "Project Goal: Led the statistical modeling phase for a multidisciplinary team tasked with forecasting revenue growth and market rank shifts of the 2024 Fortune 1000 cohort. The project required harmonizing substantial amounts of corporate financial data to uncover the underlying metrics dictating an enterprise's upward or downward mobility in the rankings.",
+      "Model Engineering (Scikit-Learn): Built a robust machine learning pipeline utilizing an ensemble of advanced techniques. This architecture integrated Random Forest regressors, Support Vector Regressors (SVR), and Multi-layer Perceptrons (MLP), each tailored to capture both the linear relationships of established physical industries and the non-linear volatility of the tech sector.",
+      "Optimization & Diagnostics: Implemented rigorous grid search protocols and cross-validation techniques to fine-tune model hyperparameters, ensuring they generalized smoothly to unseen data while avoiding overfitting. Extracted feature importance metrics to explain to non-technical stakeholders which financial levers (e.g., debt ratios, R&D spend) were driving the algorithms' final predictions.",
+      "Collaboration & Integration: Functioned as the lead data integrator within a team of four students, establishing a unified data conforming pipeline. Standardized the preprocessing of incomplete financial filings prior to synthesis into a cohesive machine learning report detailing strategic market movements.",
     ],
     tags: ["Python", "Scikit-Learn", "Neural Networks", "Random Forest", "SVR"],
     files: [{ label: "Project Report", href: "/projects/fortune-1000/report.pdf", icon: "file" }],
@@ -387,12 +419,13 @@ export const projectItems: ProjectItem[] = [
     slug: "inss-covid-impact",
     title: "COVID-19 Impact Analysis of Brazil’s Federal Revenues",
     category: "CE-442 Final Project",
-    imageSrc: "/projects/covid-impact/thumbnail.png",
+    imageSrc: covidImpactThumbnail,
     summary: "Time-series impact analysis of Brazil's federal tax revenues using Box-Jenkins methodology in R.",
     details: [
-      "Time-Series Forecasting: Built seasonal ARIMA (SARIMA) models to establish a 'business-as-usual' baseline for federal revenue streams.",
-      "Intervention Analysis: Quantified the magnitude of the pandemic's fiscal shock by comparing observed revenues against counterfactual forecasted scenarios.",
-      "Residual Diagnostics: Performed rigorous statistical testing of model residuals to ensure the robustness and validity of the fiscal impact conclusions.",
+      "Macroeconomic Context: Investigated the severe fiscal shock caused by the COVID-19 pandemic on Brazil's federal tax revenues. As a core requirement for upper-level econometrics work, the project aimed to cleanly separate the organic economic trajectories of the early 2020s from the acute, unprecedented financial impact of nationwide lockdowns.",
+      "Time-Series Architecture: Applied rigorous Box-Jenkins methodology in R to model historical federal tax receipts. Built and calibrated Seasonal ARIMA (SARIMA) models to establish a highly accurate 'business-as-usual' counterfactual—mathematically projecting what tax revenues would have been had the pandemic never occurred.",
+      "Intervention Analysis: Executed a complex intervention analysis by measuring the delta between the SARIMA counterfactual predictions and the actual observed revenues during the pandemic constraint months. This allowed for an objective quantification of the fiscal deficit directly attributable to the public health crisis.",
+      "Statistical Rigor: Ensured the absolute validity of the findings by subjecting the model residuals to strict diagnostic testing (e.g., Ljung-Box test, normality checks, and stationary variance analysis). The resulting paper provided a mathematically sound empirical foundation for evaluating the efficacy of the government's subsequent emergency economic stimulus policies.",
     ],
     tags: ["R", "ARIMA/SARIMA", "Time Series", "Fiscal Analysis", "Forecasting"],
     files: [{ label: "Project Report", href: "/projects/covid-impact/report.pdf", icon: "file" }],

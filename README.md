@@ -1,8 +1,14 @@
-# Portfolio Next
+# William Makino | Portfolio
 
-This workspace is a fresh rebuild of the portfolio using Next.js, Tailwind CSS, Framer Motion, and a Supabase-ready content structure.
+A single-page portfolio built with Next.js, Tailwind CSS, and Framer Motion. Content is driven by structured data in `src/data/portfolio.ts` for easy updates.
 
-## Getting Started
+## Stack
+
+- Next.js (App Router)
+- Tailwind CSS
+- Framer Motion
+
+## Quick Start
 
 Install dependencies:
 
@@ -10,26 +16,28 @@ Install dependencies:
 npm install
 ```
 
-Run the development server:
+Run the dev server:
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000 in your browser.
+Open http://localhost:3000.
 
-## What’s Included
+## Editing Content
 
-- Single-page portfolio layout with anchored sections
-- Light and dark mode toggle with persistent preference
-- Data-driven content schema in `src/data/portfolio.ts`
-- Deep-linkable modal panels for projects and education items
-- Framer Motion transitions for section and card reveals
+Most copy and links live in:
 
-## Content Workflow
+- `src/data/portfolio.ts`
+- `src/components/portfolio-shell.tsx`
 
-The initial content is local and structured so it can later be replaced with Supabase-backed records without changing the page layout. The Supabase client package is installed and ready for the next content-layer step.
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Run production build
+- `npm run lint` - Lint the codebase
 
 ## Deployment
 
-The app builds as a standard Next.js project and can be deployed to Vercel or a self-hosted environment after Supabase variables are configured.
+This app deploys as a standard Next.js project. Vercel is the simplest path, but any Node hosting that supports Next.js will work.
