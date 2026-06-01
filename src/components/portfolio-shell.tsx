@@ -27,6 +27,11 @@ const pageVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
+const tagPillClass = "rounded-md bg-[var(--pill-bg)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--pill-fg)]";
+const smallButtonBase = "rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm transition";
+const bodyTextClass = "text-sm leading-6 text-[var(--body)]";
+const metaLabelClass = "text-xs uppercase tracking-[0.22em] text-[var(--accent-secondary)]";
+
 const themeStorageKey = "portfolio-theme";
 const themeMediaQuery = "(prefers-color-scheme: dark)";
 
@@ -98,6 +103,94 @@ function subscribeToThemeChange(callback: () => void) {
   };
 }
 
+type DetailBlock = {
+  id: number;
+  label: string | null;
+  value: string | null;
+  items: string[];
+};
+
+function renderDetailBlocks(details: string[], activeType: ModalType | null) {
+  const blocks: DetailBlock[] = [];
+  let currentBlock: DetailBlock | null = null;
+
+  details.forEach((detail, idx) => {
+    const trimmed = detail.trim();
+    const isBullet = trimmed.startsWith("•") || trimmed.startsWith("-");
+    const parts = detail.split(": ");
+    const hasLabel = parts.length > 1 && parts[0].length < 45 && !isBullet;
+
+    if (hasLabel) {
+      if (currentBlock) blocks.push(currentBlock);
+      currentBlock = { label: parts[0], value: parts.slice(1).join(": "), items: [], id: idx };
+    } else if (currentBlock) {
+      currentBlock.items.push(detail);
+    } else {
+      blocks.push({ label: null, value: detail, items: [], id: idx });
+    }
+  });
+
+  if (currentBlock) blocks.push(currentBlock);
+
+  const renderedBlocks: React.ReactNode[] = [];
+
+  const isGridable = (label: string | null) =>
+    activeType === "timeline" && label && label.toLowerCase() !== "overview";
+
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    const nextBlock = blocks[i + 1];
+
+    if (isGridable(block.label) && isGridable(nextBlock?.label ?? null)) {
+      renderedBlocks.push(
+        <div key={`grid-${block.id}`} className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 mb-8">
+          {[block, nextBlock as DetailBlock].map((gridBlock) => (
+            <div key={gridBlock.id} className="space-y-3">
+              <span className="block font-bold text-[var(--accent)] uppercase tracking-widest text-[11px] sm:text-[12px]">
+                {gridBlock.label}
+              </span>
+              <div className="space-y-0.5 text-left">
+                {gridBlock.items.map((item, idx) => (
+                  <p key={idx} className={item.trim().startsWith("•") ? "pl-5 -indent-5" : ""}>
+                    {item}
+                  </p>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+      i++;
+    } else {
+      renderedBlocks.push(
+        <div key={block.id} className="mb-8 space-y-4">
+          {block.label && (
+            <span className="block font-bold text-[var(--accent)] uppercase tracking-widest text-[11px] sm:text-[12px]">
+              {block.label}
+            </span>
+          )}
+          <div className="space-y-4 text-justify">
+            {block.value && (
+              <p className={!block.label ? "text-[var(--body)] leading-relaxed" : "mt-1 text-[var(--body)]"}>
+                {block.value}
+              </p>
+            )}
+            <div className={(activeType === "project" || !block.label || block.label.toLowerCase() === "overview") ? "space-y-4" : "space-y-0.5"}>
+              {block.items.map((item, idx) => (
+                <p key={idx} className={item.trim().startsWith("•") ? "pl-5 -indent-5" : ""}>
+                  {item}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  return renderedBlocks;
+}
+
 export function PortfolioShell() {
   const searchParams = useSearchParams();
   const theme = useSyncExternalStore(subscribeToThemeChange, readThemeSnapshot, () => "light");
@@ -114,7 +207,11 @@ export function PortfolioShell() {
   // Local state drives the modal UI. URL is updated silently via replaceState
   // to avoid Next.js production router scroll side-effects entirely.
   const [activeModal, setActiveModal] = useState<SelectedItem>(null);
+  const modalOverlayRef = useRef<HTMLDivElement>(null);
   const modalScrollRef = useRef<HTMLDivElement>(null);
+  const fileViewerOverlayRef = useRef<HTMLDivElement>(null);
+  const fileIframeRef = useRef<HTMLIFrameElement>(null);
+  const iframeWheelCleanupRef = useRef<(() => void) | null>(null);
 
   // On mount (or hard reload), seed local state from URL
   useEffect(() => {
@@ -142,13 +239,120 @@ export function PortfolioShell() {
     return timelineItems.find((e) => e.slug === activeModal.slug) ?? null;
   }, [activeModal]);
 
-  // Scroll-lock body when any overlay is open
+  // Block page scroll while overlays are open; scroll only inside overlay panels.
   useEffect(() => {
     if (!activeFileViewer && !currentItem) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+
+    const inOverlay = (el: Element | null) =>
+      !!el &&
+      (fileViewerOverlayRef.current?.contains(el) || modalOverlayRef.current?.contains(el));
+
+    const scrollPane = (el: Element, root: Element) => {
+      let node: Element | null = el;
+      while (node && root.contains(node)) {
+        if (node instanceof HTMLElement) {
+          const { overflowY } = getComputedStyle(node);
+          if ((overflowY === "auto" || overflowY === "scroll") && node.scrollHeight > node.clientHeight) {
+            return node;
+          }
+        }
+        node = node.parentElement;
+      }
+      return root === modalOverlayRef.current ? modalScrollRef.current : null;
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (!inOverlay(target)) {
+        event.preventDefault();
+        return;
+      }
+
+      // Iframe mockups scroll in their own document; parent only blocks scroll chaining.
+      if (target instanceof HTMLIFrameElement) {
+        event.preventDefault();
+        return;
+      }
+
+      const root = fileViewerOverlayRef.current?.contains(target!) ? fileViewerOverlayRef.current! : modalOverlayRef.current!;
+      const pane =
+        scrollPane(target!, root) ??
+        (root === modalOverlayRef.current ? modalScrollRef.current : root.querySelector<HTMLElement>(".overflow-auto"));
+      if (!pane) {
+        event.preventDefault();
+        return;
+      }
+
+      const { deltaY } = event;
+      const maxScroll = pane.scrollHeight - pane.clientHeight;
+      const atEdge = deltaY < 0 ? pane.scrollTop <= 0 : pane.scrollTop >= maxScroll - 1;
+      if (atEdge) {
+        event.preventDefault();
+        return;
+      }
+
+      if (!pane.contains(target!)) {
+        pane.scrollTop += deltaY;
+        event.preventDefault();
+      }
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (!inOverlay(event.target instanceof Element ? event.target : null)) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+      iframeWheelCleanupRef.current?.();
+      iframeWheelCleanupRef.current = null;
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchmove", onTouchMove);
+    };
   }, [activeFileViewer, currentItem]);
+
+  const bindIframeWheel = () => {
+    iframeWheelCleanupRef.current?.();
+    iframeWheelCleanupRef.current = null;
+    try {
+      const doc = fileIframeRef.current?.contentDocument;
+      if (!doc?.body) return;
+      const stopChain = (event: WheelEvent) => {
+        let node: Element | null = event.target instanceof Element ? event.target : doc.body;
+        let scroller: HTMLElement | null = null;
+        while (node && node !== doc.documentElement) {
+          if (node instanceof HTMLElement) {
+            const { overflowY } = doc.defaultView!.getComputedStyle(node);
+            if ((overflowY === "auto" || overflowY === "scroll") && node.scrollHeight > node.clientHeight) {
+              scroller = node;
+              break;
+            }
+          }
+          node = node.parentElement;
+        }
+        if (!scroller) scroller = (doc.scrollingElement as HTMLElement | null) ?? doc.documentElement;
+        const max = scroller.scrollHeight - scroller.clientHeight;
+        if ((scroller.scrollTop <= 0 && event.deltaY < 0) || (scroller.scrollTop >= max - 1 && event.deltaY > 0)) {
+          event.preventDefault();
+        }
+      };
+      doc.addEventListener("wheel", stopChain, { passive: false });
+      iframeWheelCleanupRef.current = () => doc.removeEventListener("wheel", stopChain);
+    } catch {
+      // PDF viewer or cross-origin embed.
+    }
+  };
 
   // Silently sync URL with modal state (no router, no scroll side-effects)
   const syncUrl = (modal: SelectedItem) => {
@@ -178,9 +382,29 @@ export function PortfolioShell() {
     setActiveFileViewer(null);
   };
 
+  useEffect(() => {
+    if (!activeFileViewer && !activeModal) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      if (activeFileViewer) {
+        setActiveFileViewer(null);
+        return;
+      }
+      setActiveModal(null);
+      syncUrl(null);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeFileViewer, activeModal]);
+
   const updateTheme = (nextTheme: "light" | "dark") => {
-    window.localStorage.setItem(themeStorageKey, nextTheme);
-    window.dispatchEvent(new Event("portfolio-theme-change"));
+    try {
+      window.localStorage.setItem(themeStorageKey, nextTheme);
+      window.dispatchEvent(new Event("portfolio-theme-change"));
+    } catch {}
   };
 
   const [activeSection, setActiveSection] = useState("");
@@ -251,10 +475,10 @@ export function PortfolioShell() {
 
       <div className="relative mx-auto flex w-full max-w-[1344px] flex-col px-5 pb-32 pt-5 sm:px-8 lg:px-10">
         <header
-          className={`sticky top-4 z-30 mb-14 rounded-2xl border border-[var(--border)] px-4 py-4 shadow-[var(--shadow)] transition-all duration-300 ${
+          className={`sticky top-4 z-30 mb-14 rounded-xl border border-[var(--border)] px-4 py-4 shadow-[var(--shadow)] transition-all duration-300 ${
             isScrolled
-              ? "bg-[color:var(--surface)]/72 backdrop-blur-2xl backdrop-saturate-150"
-              : "bg-[color:var(--surface)]/92 backdrop-blur-xl"
+              ? "bg-[color:var(--surface)]/78 backdrop-blur-xl"
+              : "bg-[color:var(--surface)]/94 backdrop-blur-md"
           }`}
         >
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-8">
@@ -263,19 +487,19 @@ export function PortfolioShell() {
               <p className="text-xs uppercase tracking-[0.28em] text-[var(--accent)]">Portfolio</p>
             </div>
 
-            <nav className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[var(--muted)] md:mt-0">
+            <nav className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[var(--body)] md:mt-0">
               {navItems.map((item) => (
                 <a
                   key={item.id}
                   href={`#${item.id}`}
-                  className={`relative rounded-full px-3 py-1.5 transition-colors duration-300 ${
+                  className={`relative rounded-lg px-3 py-1.5 transition-colors duration-300 ${
                     activeSection === item.id ? "text-[var(--foreground)]" : "hover:text-[var(--foreground)]"
                   }`}
                 >
                   {activeSection === item.id && (
                     <motion.div
                       layoutId="active-nav-pill"
-                      className="absolute inset-0 rounded-full border border-[var(--border)] bg-[color:var(--surface-elevated)]"
+                      className="absolute inset-0 rounded-lg border border-[var(--border)] bg-[color:var(--surface-elevated)]"
                       transition={{ type: "spring", bounce: 0.18, duration: 0.6 }}
                     />
                   )}
@@ -285,7 +509,7 @@ export function PortfolioShell() {
               <button
                 type="button"
                 onClick={() => updateTheme(theme === "dark" ? "light" : "dark")}
-                className="relative rounded-full border border-[var(--border)] px-3 py-1.5 text-[var(--foreground)] transition hover:bg-[color:var(--surface-elevated)]"
+                className={`relative ${smallButtonBase} text-[var(--foreground)] hover:bg-[color:var(--surface-elevated)]`}
               >
                 {theme === "dark" ? "Light mode" : "Dark mode"}
               </button>
@@ -300,9 +524,9 @@ export function PortfolioShell() {
               initial="hidden"
               animate="visible"
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-              className="w-full max-w-[216px] shrink-0 rounded-2xl border border-[var(--border)] bg-[color:var(--surface)] p-2 shadow-[var(--shadow)]"
+              className="w-full max-w-[216px] shrink-0 rounded-xl border border-[var(--border)] bg-[color:var(--surface)] p-2 shadow-[var(--shadow)]"
             >
-              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[color:var(--surface-elevated)]">
+              <div className="overflow-hidden rounded-lg border border-[var(--border)] bg-[color:var(--surface-elevated)]">
                 <div className="relative aspect-square">
                   <Image
                     src={profile.imageSrc}
@@ -327,7 +551,7 @@ export function PortfolioShell() {
                 <h2 className="max-w-3xl text-[2.7rem] font-semibold tracking-tight text-balance sm:text-[3.375rem]">
                   {profile.name}
                 </h2>
-                <p className="pl-1 text-lg font-medium text-[var(--muted)] sm:text-xl">
+                <p className="pl-1 text-lg font-medium text-[var(--accent-secondary)] sm:text-xl">
                   {profile.role}
                 </p>
               </div>
@@ -335,13 +559,13 @@ export function PortfolioShell() {
               <div className="flex flex-wrap gap-3">
                 <a
                   href="#projects"
-                  className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
+                  className="rounded-lg bg-[var(--accent-strong)] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
                 >
                   View projects
                 </a>
                 <a
                   href="#contact"
-                  className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-medium text-[var(--foreground)] transition hover:bg-[color:var(--surface-elevated)]"
+                  className="rounded-lg border border-[var(--border)] px-5 py-3 text-sm font-medium text-[var(--foreground)] transition hover:bg-[color:var(--surface-elevated)]"
                 >
                   Contact
                 </a>
@@ -354,12 +578,12 @@ export function PortfolioShell() {
               {skillGroups.map((group, index) => (
                 <Card key={group.title} delay={index * 0.08}>
                   <h3 className="text-xl font-semibold">{group.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{group.description}</p>
+                  <p className={`mt-2 ${bodyTextClass}`}>{group.description}</p>
                   <div className="mt-5 flex flex-wrap gap-2 pt-2 border-t border-[var(--border)]">
                     {group.items.map((item) => (
                       <span
                         key={item}
-                        className="rounded-md bg-[color:var(--surface-elevated)] border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground)] transition-colors hover:bg-[var(--accent)] hover:text-white"
+                        className="rounded-sm bg-[color:var(--surface-elevated)] border border-[color:color-mix(in_srgb,var(--accent)_28%,var(--border))] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--foreground)] transition-colors hover:bg-[var(--accent-strong)] hover:border-[var(--accent-strong)] hover:text-white"
                       >
                         {item}
                       </span>
@@ -380,7 +604,7 @@ export function PortfolioShell() {
                     type="button"
                     onClick={() => openItem("timeline", item.slug)}
                     whileHover={{ y: -3 }}
-                    className="w-full rounded-xl border border-[var(--border)] bg-[color:var(--surface)] p-4 text-left shadow-[var(--shadow)] transition hover:bg-[color:var(--surface-elevated)]"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[color:var(--surface)] p-4 text-left shadow-[var(--shadow)] transition hover:bg-[color:var(--surface-elevated)]"
                   >
                     <div className="flex gap-4 sm:gap-6">
                       {item.logo && (
@@ -396,7 +620,7 @@ export function PortfolioShell() {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div>
-                            <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">{item.period}</p>
+                            <p className={metaLabelClass}>{item.period}</p>
                             <h3 className="mt-1 text-xl font-semibold">
                               {item.title}
                               {item.accolade && (
@@ -409,15 +633,15 @@ export function PortfolioShell() {
                               <p className="text-sm font-medium text-[var(--accent)] mt-0.5">{item.institution}</p>
                             )}
                           </div>
-                          <div className="flex items-center gap-1 text-sm font-medium text-[var(--muted)] sm:justify-end">
+                          <div className="flex items-center gap-1 text-sm font-medium text-[var(--accent-secondary)] sm:justify-end">
                             <span>{item.location}</span>
                             {item.country && <Flag code={item.country} />}
                           </div>
                         </div>
-                        <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{item.summary}</p>
+                        <p className={`mt-3 ${bodyTextClass}`}>{item.summary}</p>
                         <div className="mt-4 flex flex-wrap gap-2">
                           {item.tags.map((tag) => (
-                            <span key={tag} className="rounded-lg bg-[var(--pill-bg)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--pill-fg)]">
+                            <span key={tag} className={tagPillClass}>
                               {tag}
                             </span>
                           ))}
@@ -437,9 +661,9 @@ export function PortfolioShell() {
                   type="button"
                   onClick={() => openItem("project", project.slug)}
                   whileHover={{ y: -3 }}
-                  className="group flex h-full flex-col items-start justify-start rounded-xl border border-[var(--border)] bg-[color:var(--surface)] p-5 text-left shadow-[var(--shadow)] transition hover:bg-[color:var(--surface-elevated)]"
+                  className="group flex h-full flex-col items-start justify-start rounded-lg border border-[var(--border)] bg-[color:var(--surface)] p-5 text-left shadow-[var(--shadow)] transition hover:bg-[color:var(--surface-elevated)]"
                 >
-                  <div className="relative mb-5 w-full overflow-hidden rounded-lg border border-[var(--border)] bg-[color:var(--surface-elevated)]">
+                  <div className="relative mb-5 w-full overflow-hidden rounded-md border border-[var(--border)] bg-[color:var(--surface-elevated)]">
                     <div className="relative aspect-[17/11] w-full">
                       <Image
                         src={project.imageSrc}
@@ -450,12 +674,12 @@ export function PortfolioShell() {
                       />
                     </div>
                   </div>
-                  <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">{project.category}</p>
+                  <p className={metaLabelClass}>{project.category}</p>
                   <h3 className="mt-3 text-xl font-semibold">{project.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{project.summary}</p>
+                  <p className={`mt-3 ${bodyTextClass}`}>{project.summary}</p>
                   <div className="mt-auto flex flex-wrap gap-2 pt-4">
                     {project.tags.map((tag) => (
-                      <span key={tag} className="rounded-lg bg-[var(--pill-bg)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--pill-fg)]">
+                      <span key={tag} className={tagPillClass}>
                         {tag}
                       </span>
                     ))}
@@ -475,23 +699,23 @@ export function PortfolioShell() {
                     type="button"
                     onClick={() => openItem("timeline", item.slug)}
                     whileHover={{ y: -3 }}
-                    className="w-full rounded-xl border border-[var(--border)] bg-[color:var(--surface)] p-4 text-left shadow-[var(--shadow)] transition hover:bg-[color:var(--surface-elevated)]"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[color:var(--surface)] p-4 text-left shadow-[var(--shadow)] transition hover:bg-[color:var(--surface-elevated)]"
                   >
                     <div className="flex gap-4 sm:gap-6">
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div>
-                            <p className="text-xs uppercase tracking-[0.22em] text-[var(--muted)]">{item.period}</p>
+                            <p className={metaLabelClass}>{item.period}</p>
                             <h3 className="mt-1 text-xl font-semibold">{item.title}</h3>
                             {item.location && (
                               <p className="text-sm font-medium text-[var(--accent)] mt-0.5">{item.location}</p>
                             )}
                           </div>
                         </div>
-                        <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{item.summary}</p>
+                        <p className={`mt-3 ${bodyTextClass}`}>{item.summary}</p>
                         <div className="mt-4 flex flex-wrap gap-2">
                           {item.tags.map((tag) => (
-                            <span key={tag} className="rounded-lg bg-[var(--pill-bg)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--pill-fg)]">
+                            <span key={tag} className={tagPillClass}>
                               {tag}
                             </span>
                           ))}
@@ -507,7 +731,7 @@ export function PortfolioShell() {
             <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
               <Card>
                 <h3 className="text-2xl font-semibold">Let’s connect</h3>
-                <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+                <p className={`mt-3 ${bodyTextClass}`}>
                   I&apos;m always open to discussing new opportunities, collaborations, or talking about data and tech. Feel free to reach out via email or connect with me on LinkedIn and GitHub.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -517,7 +741,7 @@ export function PortfolioShell() {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm transition hover:bg-[color:var(--surface-elevated)]"
+                      className="rounded-md border border-[var(--border)] px-4 py-2 text-sm transition hover:bg-[color:var(--surface-elevated)]"
                     >
                       {link.label}
                     </a>
@@ -525,9 +749,9 @@ export function PortfolioShell() {
                 </div>
               </Card>
               <Card>
-                <p className="text-sm uppercase tracking-[0.22em] text-[var(--muted)]">Location</p>
+                <p className="text-sm uppercase tracking-[0.22em] text-[var(--accent)]">Location</p>
                 <p className="mt-3 text-lg font-medium">{profile.location}</p>
-                <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Originally from Campinas, Brazil, and now based in Canada.</p>
+                <p className={`mt-3 ${bodyTextClass}`}>Originally from Campinas, Brazil, and now based in Canada.</p>
               </Card>
             </div>
           </SectionBlock>
@@ -537,6 +761,7 @@ export function PortfolioShell() {
       <AnimatePresence>
         {currentItem ? (
           <motion.div
+            ref={modalOverlayRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -549,7 +774,7 @@ export function PortfolioShell() {
               exit={{ y: 20, opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.18 }}
               onClick={(event) => event.stopPropagation()}
-              className="w-full max-w-[806px] rounded-xl border border-[var(--border)] bg-[color:var(--surface-elevated)] p-6 shadow-[var(--shadow)]"
+              className="w-full max-w-6xl rounded-lg border border-[var(--border)] bg-[color:var(--surface-elevated)] p-6 shadow-[var(--shadow)]"
             >
               <div className="flex items-start gap-5 sm:gap-6">
                 {currentTimeline?.logo && (
@@ -565,7 +790,7 @@ export function PortfolioShell() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.24em] text-[var(--muted)]">
+                      <p className="text-xs uppercase tracking-[0.24em] text-[var(--accent-secondary)]">
                         {currentProject?.category ?? currentTimeline?.location}
                       </p>
                       <h3 className="mt-2 text-2xl font-semibold">
@@ -580,11 +805,11 @@ export function PortfolioShell() {
                         <p className="text-sm font-medium text-[var(--accent)] mt-1">{currentTimeline.institution}</p>
                       )}
                       {currentTimeline ? (
-                        <p className="mt-2 text-sm text-[var(--muted)]">{currentItem.summary}</p>
+                        <p className={`mt-2 ${bodyTextClass}`}>{currentItem.summary}</p>
                       ) : null}
                       <div className="mt-4 flex flex-wrap gap-2">
                         {currentItem.tags.map((tag) => (
-                          <span key={tag} className="rounded-lg bg-[var(--pill-bg)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--pill-fg)]">
+                          <span key={tag} className={tagPillClass}>
                             {tag}
                           </span>
                         ))}
@@ -593,7 +818,7 @@ export function PortfolioShell() {
                     <button
                       type="button"
                       onClick={closeModal}
-                      className="rounded-full border border-[var(--border)] px-3 py-1.5 text-sm transition hover:bg-[color:var(--surface)]"
+                      className={`${smallButtonBase} hover:bg-[color:var(--surface)]`}
                     >
                       Close
                     </button>
@@ -604,87 +829,12 @@ export function PortfolioShell() {
 
               <div 
                 ref={modalScrollRef}
-                className="mt-6 max-h-[60vh] overflow-y-auto pr-3 text-sm leading-6 text-[var(--muted)]"
+                className={`mt-6 max-h-[66vh] overflow-y-auto overscroll-contain pr-3 ${bodyTextClass}`}
               >
-                {(() => {
-                  const blocks: any[] = [];
-                  let currentBlock: any = null;
-
-                  currentItem.details.forEach((detail, idx) => {
-                    const isBullet = detail.trim().startsWith("•") || detail.trim().startsWith("-");
-                    const parts = detail.split(": ");
-                    const hasLabel = parts.length > 1 && parts[0].length < 45 && !isBullet;
-
-                    if (hasLabel) {
-                      if (currentBlock) blocks.push(currentBlock);
-                      currentBlock = { label: parts[0], value: parts.slice(1).join(": "), items: [], id: idx };
-                    } else if (currentBlock) {
-                      currentBlock.items.push(detail);
-                    } else {
-                      blocks.push({ label: null, value: detail, items: [], id: idx });
-                    }
-                  });
-                  if (currentBlock) blocks.push(currentBlock);
-
-                  const renderedBlocks: any[] = [];
-                  for (let i = 0; i < blocks.length; i++) {
-                    const b = blocks[i];
-                    const nextB = blocks[i + 1];
-
-                    const isGridable = (label: string) => 
-                      activeModal?.type === "timeline" && label && label.toLowerCase() !== "overview";
-
-                    if (isGridable(b.label) && isGridable(nextB?.label)) {
-                      renderedBlocks.push(
-                        <div key={`grid-${b.id}`} className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 mb-8">
-                          {[b, nextB].map((block) => (
-                            <div key={block.id} className="space-y-3">
-                              <span className="block font-bold text-[var(--foreground)] uppercase tracking-widest text-[11px] sm:text-[12px]">
-                                {block.label}
-                              </span>
-                              <div className="space-y-0.5 text-left">
-                                {block.items.map((item: string, idx: number) => (
-                                  <p key={idx} className={item.trim().startsWith("•") ? "pl-5 -indent-5" : ""}>
-                                    {item}
-                                  </p>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                      i++;
-                    } else {
-                      renderedBlocks.push(
-                        <div key={b.id} className="mb-8 space-y-4">
-                          {b.label && (
-                            <span className="block font-bold text-[var(--foreground)] uppercase tracking-widest text-[11px] sm:text-[12px]">
-                              {b.label}
-                            </span>
-                          )}
-                          <div className={`space-y-4 text-justify`}>
-                            {b.value && (
-                              <p className={!b.label ? "text-[var(--muted)] leading-relaxed" : "mt-1"}>
-                                {b.value}
-                              </p>
-                            )}
-                            <div className={(activeModal?.type === "project" || !b.label || b.label.toLowerCase() === "overview") ? "space-y-4" : "space-y-0.5"}>
-                              {b.items.map((item: string, idx: number) => (
-                                <p key={idx} className={item.trim().startsWith("•") ? "pl-5 -indent-5" : ""}>
-                                  {item}
-                                </p>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-                  }
-                  return renderedBlocks;
-                })()}
+                {renderDetailBlocks(currentItem.details, activeModal?.type ?? null)}
                 {currentProjectFiles.length > 0 ? (
                   <div className="border-t border-[var(--border)] pt-6 opacity-80">
-                    <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+                    <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--accent-secondary)]">
                       Project Files
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -699,7 +849,7 @@ export function PortfolioShell() {
                               setActiveFileViewer({ title: currentItem.title, href: file.href });
                             }
                           }}
-                          className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-[color:var(--surface)]"
+                          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition hover:bg-[color:var(--surface)]"
                         >
                           <span
                             className="icon-minimalist"
@@ -725,6 +875,7 @@ export function PortfolioShell() {
       <AnimatePresence>
         {activeFileViewer ? (
           <motion.div
+            ref={fileViewerOverlayRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -737,11 +888,11 @@ export function PortfolioShell() {
               exit={{ y: 12, opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.1 }}
               onClick={(event) => event.stopPropagation()}
-              className={`flex ${isImageHref(activeFileViewer.href) ? "h-auto max-h-[88vh]" : "h-[88vh]"} w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[color:var(--surface-elevated)] shadow-[var(--shadow)]`}
+              className={`flex ${isImageHref(activeFileViewer.href) ? "h-auto max-h-[88vh]" : "h-[88vh]"} w-full max-w-6xl flex-col overflow-hidden rounded-lg border border-[var(--border)] bg-[color:var(--surface-elevated)] shadow-[var(--shadow)]`}
             >
               <div className="flex items-center justify-between gap-4 border-b border-[var(--border)] px-4 py-3 sm:px-5">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--muted)]">Original file</p>
+                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--accent-secondary)]">Original file</p>
                   <h3 className="mt-1 text-lg font-semibold">{activeFileViewer.title}</h3>
                 </div>
                 <div className="flex items-center gap-2">
@@ -749,21 +900,21 @@ export function PortfolioShell() {
                     href={activeFileViewer.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-full border border-[var(--border)] px-3 py-1.5 text-sm transition hover:bg-[color:var(--surface)]"
+                    className={`${smallButtonBase} hover:bg-[color:var(--surface)]`}
                   >
                     Open in new tab
                   </a>
                   <button
                     type="button"
                     onClick={closeFileViewer}
-                    className="rounded-full border border-[var(--border)] px-3 py-1.5 text-sm transition hover:bg-[color:var(--surface)]"
+                    className={`${smallButtonBase} hover:bg-[color:var(--surface)]`}
                   >
                     Close
                   </button>
                 </div>
               </div>
               {isImageHref(activeFileViewer.href) ? (
-                <div className="flex-1 overflow-auto bg-black/5 p-4 flex items-center justify-center">
+                <div className="flex-1 overflow-auto overscroll-contain bg-black/5 p-4 flex items-center justify-center">
                   <img
                     src={activeFileViewer.href}
                     alt={activeFileViewer.title}
@@ -772,9 +923,11 @@ export function PortfolioShell() {
                 </div>
               ) : (
                 <iframe
+                  ref={fileIframeRef}
                   title={activeFileViewer.title}
                   src={activeFileViewer.href.toLowerCase().endsWith(".pdf") ? `${activeFileViewer.href}#view=FitH` : activeFileViewer.href}
-                  className="h-full w-full bg-white"
+                  className="h-full w-full border-0 bg-white"
+                  onLoad={bindIframeWheel}
                 />
               )}
             </motion.div>
@@ -806,6 +959,7 @@ function SectionBlock({
     >
       <div className="mb-6">
         <h2 className="text-3xl font-semibold tracking-tight">{title}</h2>
+        <div className="mt-3 h-0.5 w-10 rounded-full bg-[var(--accent)]" />
       </div>
       {children}
     </motion.section>
@@ -826,7 +980,7 @@ function Card({
       whileInView="visible"
       viewport={{ once: true, amount: 0.18 }}
       transition={{ duration: 0.45, ease: "easeOut", delay }}
-      className="rounded-xl border border-[var(--border)] bg-[color:var(--surface)] p-5 shadow-[var(--shadow)]"
+      className="rounded-lg border border-[var(--border)] bg-[color:var(--surface)] p-5 shadow-[var(--shadow)]"
     >
       {children}
     </motion.div>

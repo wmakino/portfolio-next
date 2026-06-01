@@ -10,6 +10,7 @@ import nycRideshareThumbnail from "../../public/images/thumbnails/nyc-rideshare.
 import monographThumbnail from "../../public/images/thumbnails/monograph.png";
 import fortuneThumbnail from "../../public/images/thumbnails/fortune-1000.png";
 import covidImpactThumbnail from "../../public/images/thumbnails/covid-impact.png";
+import cursorHackathonThumbnail from "../../public/images/thumbnails/cursor-hackathon.png";
 
 export type SocialLink = {
   label: string;
@@ -294,6 +295,25 @@ export const timelineItems: TimelineItem[] = [
 
 export const projectItems: ProjectItem[] = [
   {
+    slug: "cursor-hackathon",
+    title: "Smart Inbox (Cursor Hackathon)",
+    category: "Hackathon Product Prototype",
+    imageSrc: cursorHackathonThumbnail,
+    summary:
+      "End-to-end Gmail triage product concept that turns a noisy inbox into a prioritized control panel, combining AI classification with a dense, executive-style dashboard and a realistic sign-in flow.",
+    details: [
+      "Product narrative: Smart Inbox positions itself as a Gmail assistant, spanning a marketing-led landing page, an operational inbox dashboard, and a Google sign-in experience to simulate the full SaaS journey.",
+      "AI triage workflow: Incoming mail is auto-routed into Action Required, Transactions, Newsletters & Promos, and In the Loop buckets, with urgency counts and progress bars that make workload distribution instantly legible.",
+      "Decision support UI: The dashboard surfaces overdue alerts, quick-glance summaries, and category-level pacing to help users focus on the highest-impact items first.",
+      "Hackathon context: Built during the 24-hour Cursor Calgary Hackathon at SAIT with a team of three using a single fixed prompt and demoed under product-quality judging criteria.",
+      "Original build used Gmail APIs plus Google Auth for live login and GPT-5 mini for real-time email classification; auth and API calls were stripped for static portfolio hosting.",
+    ],
+    tags: ["Next.js", "Gmail API", "Google Auth", "GPT-5-mini", "Product Design"],
+    files: [
+      { label: "Prototype Demo", href: "/projects/cursor_hackathon/sign-in.html", icon: "window" },
+    ],
+  },
+  {
     slug: "credit-risk-analysis",
     title: "Credit Risk Analysis & Deployment",
     category: "DATA-440 & ARTI-404 Final Project",
@@ -308,8 +328,8 @@ export const projectItems: ProjectItem[] = [
     tags: ["Python", "Scikit-Learn", "Flask", "HTML/CSS", "Machine Learning", "Model Tuning"],
     files: [
       { label: "Lending Form UI", href: "/projects/credit_risk/lending_form_V2.html", icon: "window" },
-      { label: "Flask Application", href: "/projects/credit_risk/app.html", icon: "code" },
-      { label: "Model Tuning & EDA", href: "/projects/credit_risk/DATA440_Phase-4_CRAM_EDA_model_tuning.html", icon: "code" },
+      { label: "Flask Application", href: "/projects/credit_risk/app.html" },
+      { label: "Model Tuning & EDA", href: "/projects/credit_risk/DATA440_Phase-4_CRAM_EDA_model_tuning.html" },
       { label: "System Architecture", href: "/projects/credit_risk/diagram.png", icon: "image" },
     ],
   },
@@ -327,8 +347,8 @@ export const projectItems: ProjectItem[] = [
     ],
     tags: ["Human-Centered AI", "UX Research", "Transparency", "Ethics"],
     files: [
-      { label: "Final Report", href: "/projects/ai_grading/Final Project Report.pdf", icon: "file" },
-      { label: "Interactive Mockup", href: "/projects/ai_grading/ai-grading-system_v3.html", icon: "code" },
+      { label: "Final Report", href: "/projects/ai_grading/Final Project Report.pdf" },
+      { label: "Interactive Mockup", href: "/projects/ai_grading/ai-grading-system_v3.html", icon: "window" },
     ],
   },
   {
@@ -346,10 +366,10 @@ export const projectItems: ProjectItem[] = [
     ],
     tags: ["Python", "GeoPandas", "Geospatial", "Monte Carlo", "Forecasting", "Matplotlib"],
     files: [
-      { label: "Capcon Poster", href: "/projects/canada-ev-infrastructure/poster.pdf", icon: "image" },
-      { label: "Presentation Slides", href: "/projects/canada-ev-infrastructure/presentation.pdf", icon: "presentation" },
-      { label: "Project Report", href: "/projects/canada-ev-infrastructure/deliverable.pdf", icon: "file" },
-      { label: "Python Code", href: "/projects/canada-ev-infrastructure/Heatmap.html", icon: "code" },
+      { label: "Capcon Poster", href: "/projects/canada-ev-infrastructure/poster.pdf" },
+      { label: "Presentation Slides", href: "/projects/canada-ev-infrastructure/presentation.pdf" },
+      { label: "Project Report", href: "/projects/canada-ev-infrastructure/deliverable.pdf" },
+      { label: "Python Code", href: "/projects/canada-ev-infrastructure/Heatmap.html" },
     ],
   },
   {
@@ -365,7 +385,7 @@ export const projectItems: ProjectItem[] = [
       "Business Intelligence Synthesis: Consolidated the output of the predictive models and stochastic simulations into a unified analytical dashboard. This comprehensive tool allows for dynamic scenario testing across the season, simulating the high-pressure data environments utilized by professional trackside strategists.",
     ],
     tags: ["Excel", "Monte Carlo", "kNN", "Linear Regression", "Scenario Forecasting"],
-    files: [{ label: "Project Report", href: "/projects/f1-analysis/report.pdf", icon: "file" }],
+    files: [{ label: "Project Report", href: "/projects/f1-analysis/report.pdf" }],
   },
   {
     slug: "daan-predictive-analytics",
@@ -380,7 +400,7 @@ export const projectItems: ProjectItem[] = [
       "Supervised Predictive Workflows: Architected robust supervised learning pipelines, including classification decision trees and multivariate linear regression models. These advanced statistics were fine-tuned to predict exact trip durations and expected fares based on time of day and external traffic variables, ultimately culminating in an intricate technical report.",
     ],
     tags: ["R", "k-Means Clustering", "Decision Trees", "Regression", "Exploratory Data Analysis"],
-    files: [{ label: "Project Report", href: "/projects/nyc-rideshare/Final-Project.pdf", icon: "file" }],
+    files: [{ label: "Project Report", href: "/projects/nyc-rideshare/Final-Project.pdf" }],
   },
   {
     slug: "monograph-capstone",
@@ -396,7 +416,7 @@ export const projectItems: ProjectItem[] = [
     ],
     tags: ["Macroeconomics", "Public Finance", "Monetary Policy", "Economic Theory"],
     files: [
-      { label: "Full Monograph", href: "/projects/monograph/Monografia-Makino.pdf", icon: "file" },
+      { label: "Full Monograph", href: "/projects/monograph/Monografia-Makino.pdf" },
       { label: "Defense Slides", href: "/projects/monograph/Defesa Monografia.pdf", icon: "presentation" },
     ],
   },
@@ -413,7 +433,7 @@ export const projectItems: ProjectItem[] = [
       "Collaboration & Integration: Functioned as the lead data integrator within a team of four students, establishing a unified data conforming pipeline. Standardized the preprocessing of incomplete financial filings prior to synthesis into a cohesive machine learning report detailing strategic market movements.",
     ],
     tags: ["Python", "Scikit-Learn", "Neural Networks", "Random Forest", "SVR"],
-    files: [{ label: "Project Report", href: "/projects/fortune-1000/report.pdf", icon: "file" }],
+    files: [{ label: "Project Report", href: "/projects/fortune-1000/report.pdf" }],
   },
   {
     slug: "inss-covid-impact",
@@ -428,6 +448,6 @@ export const projectItems: ProjectItem[] = [
       "Statistical Rigor: Ensured the absolute validity of the findings by subjecting the model residuals to strict diagnostic testing (e.g., Ljung-Box test, normality checks, and stationary variance analysis). The resulting paper provided a mathematically sound empirical foundation for evaluating the efficacy of the government's subsequent emergency economic stimulus policies.",
     ],
     tags: ["R", "ARIMA/SARIMA", "Time Series", "Fiscal Analysis", "Forecasting"],
-    files: [{ label: "Project Report", href: "/projects/covid-impact/report.pdf", icon: "file" }],
+    files: [{ label: "Project Report", href: "/projects/covid-impact/report.pdf" }],
   },
 ];
