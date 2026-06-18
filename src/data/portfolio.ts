@@ -61,14 +61,12 @@ export const profile = {
   role: "Artificial Intelligence, Data Science and Economics",
   location: "Calgary, Alberta",
   imageSrc: "/images/pfp.jpg",
-  summary:
-    "Building practical data products, analytical systems, and polished portfolio experiences that help recruiters understand technical depth quickly.",
 };
 
 export const socialLinks: SocialLink[] = [
-  { label: "GitHub", href: "https://github.com/wmakino" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/wmakino/" },
   { label: "Email", href: "mailto:wmakino@outlook.com" },
+  { label: "GitHub", href: "https://github.com/wmakino" },
 ];
 
 export const navItems = [
@@ -82,17 +80,17 @@ export const navItems = [
 export const skillGroups: SkillGroup[] = [
   {
     title: "Machine Learning & AI",
-    description: "Building, tuning and deploying predictive models and intelligent systems.",
+    description: "Training and shipping models, from sklearn baselines to LLM-backed apps.",
     items: ["Python", "Scikit-Learn", "PyTorch", "Pandas", "NLP", "Computer Vision", "LLMs"],
   },
   {
     title: "Data Analytics & Strategy",
-    description: "Extracting insights through statistical analysis and business intelligence workflows.",
+    description: "SQL, statistics, and BI tools for turning raw tables into decisions.",
     items: ["SQL", "Tableau", "Power BI", "Excel", "Statistics", "Predictive Analytics"],
   },
   {
     title: "Software & Cloud",
-    description: "Developing production-ready web applications, APIs, and scalable architectures.",
+    description: "Web apps and APIs with Flask, React, and Next.js.",
     items: ["Flask", "React", "Next.js", "HTML/CSS", "Git", "Cloud Computing", "System Integration"],
   },
 ];
@@ -110,10 +108,11 @@ export const timelineItems: TimelineItem[] = [
       light: "/images/logos/sait_core_vertical_full_colour_rgb_v2.png",
       dark: "/images/logos/sait_core_vertical_reverse_v2.png",
     },
-    summary: "Currently completing SAIT's Integrated Artificial Intelligence post-diploma certificate, a one-year program centered on applied AI systems, production-ready web development, and real-world problem solving.",
+    summary:
+      "One-year post-diploma at SAIT: applied AI from modeling through deployment, plus the business and management side of running AI systems in production.",
     details: [
-      "Overview: SAIT's Integrated Artificial Intelligence post-diploma certificate is a 30-credit program engineered to bridge the gap between theoretical data science and production-ready AI applications. The curriculum covers the end-to-end lifecycle of intelligent systems, beginning with applied statistics and predictive analytics, and extending into specialized domains like natural language processing (NLP) and computer vision. A core focus is placed on modern generative AI, equipping students with the ability to build and deploy systems utilizing large language models (LLMs), multimodal AI, fine-tuning, prompt engineering, and autonomous agents with memory and reasoning capabilities.",
-      "To ensure these models can be successfully deployed, the program integrates full-stack web development and cloud computing fundamentals. This includes practical experience with cloud compute services, security protocols, and migration strategies. Finally, the technical coursework is grounded by crucial operational frameworks, focusing on responsible AI design, system management, compliance, performance tuning, and explainability, ultimately culminating in a comprehensive, real-world capstone project.",
+      "Overview: SAIT's Integrated Artificial Intelligence certificate is 30 credits. It starts with stats and predictive modeling, then moves into NLP, computer vision, and generative AI (LLMs, fine-tuning, prompt design, agents with memory). Governance, human-centered design, and post-launch ops sit in the same curriculum as the modeling courses.",
+      "You train models, connect them to apps, and learn how to keep them running in production. Web and cloud courses cover deployment (compute, security, migration). Ethics, compliance, explainability, monitoring, tuning, and maintenance appear throughout. Governance and management classes cover the business side. The capstone is a client project with a working deliverable and a written case for it.",
       "Semester 1: ",
       "• ETHI 401: AI Governance and Ethics",
       "• ARTI 404: Web Development and Cloud Computing",
@@ -134,6 +133,7 @@ export const timelineItems: TimelineItem[] = [
       "Predictive Analytics",
       "Full-Stack Web Dev",
       "Cloud Computing",
+      "AI Management",
       "Responsible AI",
       "AI Operations",
     ],
@@ -151,10 +151,10 @@ export const timelineItems: TimelineItem[] = [
       light: "/images/logos/sait_core_vertical_full_colour_rgb_v2.png",
       dark: "/images/logos/sait_core_vertical_reverse_v2.png",
     },
-    summary: "The curriculum covers the full data pipeline, from database queries and ETL processes to data visualization and machine learning, culminating in a capstone project solving a real-world business case.",
+    summary: "24-credit program from SQL and ETL through visualization, modeling, and a business capstone.",
     details: [
-      "Overview: SAIT's Data Analytics post-diploma certificate is a 24-credit program designed to equip students with the technical skills needed to extract value from complex datasets and drive business strategy. The curriculum covers the complete data analysis pipeline, starting with foundational techniques in data manipulation, database querying, and ETL (extract, transform, load) processes. Students progress into advanced statistical analysis, predictive modeling, and data mining, utilizing industry-standard programming languages and business intelligence software.",
-      "The program also explores advanced frontiers of the field, including machine learning, deep learning, probabilistic programming, and the implications of IoT and cloud computing. By combining rigorous technical instruction in data visualization and modeling with practical applications, the program prepares graduates to deliver refined insights and solve complex challenges, culminating in a comprehensive capstone project built around an industry business case.",
+      "Overview: SAIT's Data Analytics post-diploma is 24 credits. Early courses cover data literacy, SQL, ETL, and statistics. Later ones add predictive modeling, BI reporting, and more advanced analytics topics.",
+      "Machine learning, deep learning, and cloud/IoT land in the second semester. The capstone is an industry case where you clean messy data, analyze it, and present findings to the class.",
       "Semester 1: ",
       "• DATA 401: Data Literacy",
       "• DATA 410: Business Context for Data Analysis",
@@ -188,10 +188,10 @@ export const timelineItems: TimelineItem[] = [
       light: "/images/logos/unicamp_preto_v2.png",
       dark: "/images/logos/unicamp_branco_v2.png",
     },
-    summary: "Ranked as one of the most prestigious economics programs in Latin America, the curriculum merges intense mathematical and statistical modeling with pluralistic economic theory and critical analysis of public policy.",
+    summary: "Five-year BSc at UNICAMP: heavy math and econometrics with heterodox and orthodox theory.",
     details: [
-      "Overview: Unicamp's Bachelor in Economic Sciences is an intensive 3000-hour, 200-credit program renowned for producing some of Brazil's leading economists and public policy experts. The curriculum provides a unique balance of rigorous quantitative training with a deeply pluralistic approach to economic theory. Students master foundational tools in calculus, linear algebra, and econometrics while studying diverse schools of economic thought. \n\n",
-      "The core curriculum covers microeconomics, macroeconomics, political economy, and Brazilian economic history, ensuring students can contextualize data within historical and social frameworks. As students progress, they take on advanced quantitative methods, including econometrics, financial mathematics, and dynamic models. Through a wide array of specialized electives, graduates can tailor their expertise toward financial markets, data science, industrial organization, public policy, or economic development.",
+      "Overview: UNICAMP's Economics degree is 3,000 hours and 200 credits. Calculus, linear algebra, and econometrics take up a large share of the core. Keynesian, structuralist, and orthodox approaches run through the required coursework from the first years.",
+      "Core courses span micro, macro, political economy, and Brazilian economic history. Upper years add econometrics, financial math, and dynamic models. Electives let you lean toward finance, data science, industrial org, or public policy. I wrote my monograph on monetary financing during COVID.",
       "Semester 1: ",
       "• CE191: General Economic History I",
       "• MA111: Calculus I",
@@ -270,11 +270,11 @@ export const timelineItems: TimelineItem[] = [
     period: "Nov 2025 – Dec 2025",
     title: "Computing Solutions Advisor",
     location: "Best Buy Canada",
-    summary: "Served as a temporary contract worker providing consultative technical sales and support during peak high-volume retail periods.",
+    summary: "Holiday contract in Best Buy's computing department: consultative sales during Black Friday and Boxing Day rushes.",
     details: [
-      "Supported the Computing department during peak holiday periods (Black Friday/Boxing Day), handling heavy foot traffic while maintaining fast, personalized service.",
-      "Delivered consultative, customer-focused guidance on a wide range of electronics by leveraging IT knowledge and strong customer relations skills.",
-      "Strengthened ability to explain complex technical concepts clearly to non-technical users and perform well under tight time constraints while multitasking.",
+      "Covered the computing floor during peak holiday traffic (Black Friday and Boxing Day). Volume was high; the job was matching people to the right gear without rushing them off.",
+      "Explained specs and trade-offs to customers who ranged from first-time buyers to people upgrading custom builds.",
+      "Got better at translating jargon into plain language and staying calm when three conversations needed attention at once.",
     ],
     tags: ["Technical Sales", "Client Relations", "Merchandising", "Multitasking", "Attention to Detail", "B2C Sales"],
   },
@@ -284,10 +284,10 @@ export const timelineItems: TimelineItem[] = [
     period: "Jul 2024 – Mar 2025",
     title: "Private Technology Coach/Tutor",
     location: "Self Employed",
-    summary: "Designed and delivered custom digital literacy curricula to help older adults confidently navigate modern technology ecosystems.",
+    summary: "Private tutoring for older adults on phones, email, Windows, and everyday digital tasks.",
     details: [
-      "Delivered personalized one-on-one digital literacy instruction to older adults, covering Windows OS environments, smartphones (iOS/Android), email management, web browsing, and everyday technology use.",
-      "Guided clients in building confidence with devices and online tools by providing patient, structured support in account setup, system troubleshooting, internet safety, and practical day-to-day digital tasks.",
+      "One-on-one sessions with older adults on Windows, iOS/Android, email, browsing, and account setup.",
+      "Most clients needed patience more than technical depth: repeating steps, writing things down, and building confidence with devices they already owned.",
     ],
     tags: ["1:1 Instruction", "System Troubleshooting", "Windows OS", "Mobile Platforms", "Cybersecurity Basics", "Digital Literacy"],
   },
@@ -300,13 +300,13 @@ export const projectItems: ProjectItem[] = [
     category: "Hackathon Product Prototype",
     imageSrc: cursorHackathonThumbnail,
     summary:
-      "End-to-end Gmail triage product concept that turns a noisy inbox into a prioritized control panel, combining AI classification with a dense, executive-style dashboard and a realistic sign-in flow.",
+      "24-hour hackathon build: Gmail triage mockup with sorted buckets, urgency counts, sign-in flow, and a dense priority dashboard.",
     details: [
-      "Product narrative: Smart Inbox positions itself as a Gmail assistant, spanning a marketing-led landing page, an operational inbox dashboard, and a Google sign-in experience to simulate the full SaaS journey.",
-      "AI triage workflow: Incoming mail is auto-routed into Action Required, Transactions, Newsletters & Promos, and In the Loop buckets, with urgency counts and progress bars that make workload distribution instantly legible.",
-      "Decision support UI: The dashboard surfaces overdue alerts, quick-glance summaries, and category-level pacing to help users focus on the highest-impact items first.",
-      "Hackathon context: Built during the 24-hour Cursor Calgary Hackathon at SAIT with a team of three using a single fixed prompt and demoed under product-quality judging criteria.",
-      "Original build used Gmail APIs plus Google Auth for live login and GPT-5 mini for real-time email classification; auth and API calls were stripped for static portfolio hosting.",
+      "Overview: Built in 24 hours at the Cursor Calgary Hackathon (SAIT) with a team of three. One prompt for the whole build. We demoed the landing page, sign-in flow, and dashboard to the jury.",
+      "Problem: Most inboxes mix urgent replies, receipts, newsletters, and FYI threads in one chronological list. We wanted a screen that surfaces what needs a decision first.",
+      "Approach: Split the product into a landing page, Google sign-in screen, and operational dashboard. Incoming mail routes into Action Required, Transactions, Newsletters & Promos, and In the Loop. Each bucket gets counts, overdue flags, and sample threads so you can see the backlog on one screen.",
+      "Results: Demo showed how a busy user clears overdue replies first instead of scrolling chronologically. Buckets and counts make it obvious where time goes. Live build used Gmail APIs, Google Auth, and GPT-5-mini; the portfolio file is a static export of that UI.",
+      "Stack: Next.js, Gmail API, Google Auth, GPT-5-mini, product/UI design.",
     ],
     tags: ["Next.js", "Gmail API", "Google Auth", "GPT-5-mini", "Product Design"],
     files: [
@@ -318,12 +318,14 @@ export const projectItems: ProjectItem[] = [
     title: "Credit Risk Analysis & Deployment",
     category: "DATA-440 & ARTI-404 Final Project",
     imageSrc: creditRiskThumbnail,
-    summary: "End-to-end credit risk assessment system combining advanced machine learning modeling with a production-ready web interface.",
+    summary:
+      "Dual final project: train a credit-risk classifier with EDA and tuning, then ship it through a Flask app with a lending form, live scores, and SHAP explanations.",
     details: [
-      "Machine Learning (DATA-440): Developed a robust predictive model for credit risk assessment, including comprehensive Exploratory Data Analysis (EDA) and rigorous hyperparameter tuning to optimize classification accuracy.",
-      "Web Development (ARTI-404): Designed and launched a full-stack web application to serve the model, featuring a custom-built lending form and an interactive results dashboard for real-time risk evaluation.",
-      "Integration & Deployment: Bridged the gap between data science and software engineering by containerizing the model and exposing it through a Flask API, ensuring seamless communication between the frontend and the predictive backend.",
-      "System Architecture: The solution is built as a modular Flask application. It features a responsive frontend designed with HTML5 and CSS3, a Python-based backend that handles real-time data processing, and a SQLite database for persistence. The architecture ensures that model predictions and SHAP feature importance values are computed and stored as soon as a form is submitted.",
+      "Overview: Combined DATA-440 (predictive modeling) and ARTI-404 (web development) into one deliverable. The model needed to be accurate and explainable so a lender could see why a score moved.",
+      "Problem: Credit decisions need a score and a reason. Staff also need a form they can submit without opening a notebook.",
+      "Approach: Ran full EDA and hyperparameter tuning in Python before locking features. Wrapped the classifier in Flask with a custom lending form, validation, and SQLite persistence. Every submission stores the prediction plus SHAP values so the results screen names the top contributors.",
+      "Results: A loan officer can submit an application, get a risk score, and explain the top drivers to an applicant in the same session. Stored history supports review if a decision gets questioned later. Notebook and architecture exports cover the modeling work separately from the live app.",
+      "Stack: Python, Scikit-Learn, Flask, HTML/CSS, SQLite, SHAP.",
     ],
     tags: ["Python", "Scikit-Learn", "Flask", "HTML/CSS", "Machine Learning", "Model Tuning"],
     files: [
@@ -338,12 +340,14 @@ export const projectItems: ProjectItem[] = [
     title: "Human-Centered AI Grading",
     category: "ARTI-406 Final Project",
     imageSrc: aiGradingThumbnail,
-    summary: "Human-centered AI grading assistant designed to reduce instructor workload while preserving transparency, control, and academic oversight.",
+    summary:
+      "Human-centered AI grading concept: instructors set rubrics and strictness, review every AI suggestion, and keep final approval over scores and feedback.",
     details: [
-      "Project Scope: Designed an end-to-end concept for an AI-powered grading assistant tailored specifically to educational environments. Rather than attempting to automate grading entirely—which introduces significant ethical and pedagogical risks—this project focused on a human-centered design approach. The overarching goal was to drastically reduce the administrative burden of grading while keeping instructors firmly in the loop as the final decision-makers.",
-      "Workflow & UX Design: Developed a robust, rubric-first grading flow accessible via an interactive web-based mockup. The system allows educators to define custom scoring criteria and adjust the AI's strictness levels (e.g., 'strict', 'medium', 'lenient'). By automatically matching student submissions against these parameters, the system generates baseline scores and proposes structured, constructive feedback that the instructor can review, tweak, or accept.",
-      "Human-In-The-Loop Iteration: The development lifecycle relied heavily on UX research and iterative instructor feedback. Initial concepts were refined to eliminate confusing AI black boxes, leading to a transparent interface where every AI-generated suggestion includes a clear rationale linking back to the rubric. This significantly reduced manual data entry while fostering trust in the algorithm's outputs.",
-      "Ethical Considerations & Privacy: Tackled the inherent biases and privacy concerns of using LLMs in academic evaluation. The architecture conceptually isolates student data to remain compliant with privacy standards, while the UI forces an active 'approve' step to prevent automation bias. The project reinforces long-term governance strategies to ensure the tool remains equitable and mathematically sound across diverse student cohorts.",
+      "Overview: ARTI-406 final project on human-centered AI in education. Cut grading busywork while keeping the instructor as the person who posts the final grade.",
+      "Problem: Full auto-grading saves time but raises fairness, privacy, and trust issues. Instructors still need control and a clear audit trail from rubric to score.",
+      "Approach: Designed a rubric-first flow in an interactive web mockup. Educators pick strictness (strict, medium, lenient), upload criteria, and review batch suggestions one by one. Each proposed score or comment links back to the rubric line that triggered it. Iterated wireframes after instructor feedback; early versions hid too much of the model's reasoning.",
+      "Results: Instructors could batch-review AI suggestions instead of writing every comment from scratch, while still posting the grade themselves. The mockup and report spell out where time saves and where human review stays mandatory (bias, privacy, approve-before-post).",
+      "Stack: UX research, interactive HTML mockup, ethics and governance analysis.",
     ],
     tags: ["Human-Centered AI", "UX Research", "Transparency", "Ethics"],
     files: [
@@ -356,13 +360,14 @@ export const projectItems: ProjectItem[] = [
     title: "Canada EV Infrastructure",
     category: "Data Analytics Capstone",
     imageSrc: canadaEvThumbnail,
-    summary: "Data Analytics Capstone on Canada's EV charging network and federal investment strategy.",
+    summary:
+      "Capstone modeled as an NRCan consulting job: geospatial analysis, Monte Carlo budget runs, and demand forecasts to place EV chargers across Canada.",
     details: [
-      "This capstone project was an academic simulation of a consulting engagement for Natural Resources Canada (NRCan). The goal was to build a data-driven decision-support tool to optimize federal electric vehicle infrastructure allocation. The core focus was architecting an end-to-end analytical pipeline using spatial data, stochastic simulations, and predictive modeling.",
-      "Geospatial Analysis (Python & GeoPandas): Processed Geodatabase (GDB) files and shapefiles to extract line and point geometries for the National Highway System. Layered these routes with station coordinates and census data, applying an ecumene filter to mathematically restrict the spatial analysis strictly to inhabited areas.",
-      "Stochastic Modeling: Built a Monte Carlo simulation running 1,000 iterations to optimize a fixed $100 million budget constraint. The algorithm utilized custom utility scoring and sensitivity analysis to evaluate the mathematical trade-offs between deploying high-volume standard chargers versus high-impact fast chargers.",
-      "Scenario-Based Forecasting: Designed predictive models using historical vehicle registration trends to calculate future infrastructure demand. Tested multiple fleet composition splits to dynamically forecast hardware requirements under highly uncertain market conditions.",
-      "Data Engineering: Integrated disparate datasets from government sources, global sales databases, and flat files. Standardized geographic coordinates, power outputs, and categorical attributes into a clean, conformed data model to feed both the interactive visualizations and the quantitative simulations."
+      "Overview: Data Analytics capstone framed as a consulting engagement for Natural Resources Canada. The ask was where to spend a fixed federal budget on EV charging given highways, population, and existing coverage.",
+      "Problem: Standard chargers cost less per unit; fast chargers cost more but matter on highway corridors. Planners also need numbers that still make sense when fleet mix shifts.",
+      "Approach: Built a Python pipeline with GeoPandas on GDB/shapefile data for the National Highway System, station points, and census boundaries. Applied an ecumene filter so empty land did not skew results. Ran 1,000 Monte Carlo iterations on a $100M budget with custom utility scoring and sensitivity checks. Added registration trends for scenario forecasts under different EV adoption paths.",
+      "Results: Deliverables gave NRCan-style guidance on stretching a $100M budget across populated corridors vs fast-charger coverage. Poster, slides, and report let a planner compare mixes under different EV adoption paths instead of betting on one map.",
+      "Stack: Python, GeoPandas, Matplotlib, Monte Carlo simulation, geospatial joins.",
     ],
     tags: ["Python", "GeoPandas", "Geospatial", "Monte Carlo", "Forecasting", "Matplotlib"],
     files: [
@@ -377,12 +382,14 @@ export const projectItems: ProjectItem[] = [
     title: "2024 F1 Season Analysis",
     category: "DATA-415 Final Project",
     imageSrc: f1Thumbnail,
-    summary: "Advanced performance modeling of the 2024 Formula 1 season using stochastic simulations and predictive techniques in Excel.",
+    summary:
+      "2024 F1 season analysis in Excel using OpenF1 data, kNN and regression models, plus Monte Carlo simulations for championship points.",
     details: [
-      "Project Goal: Leveraged high-frequency telemetry, historic tire degradation statistics, and pitstop intervals from the OpenF1 API into actionable driver forecasts for both the Drivers' and Constructors' F1 championships.",
-      "Predictive Modeling: Developed a suite of predictive models to analyze race dynamics. This included building k-Nearest Neighbors (kNN) algorithms to classify driver performance brackets and linear regression frameworks to quantify the exact pace efficiency of different vehicle setups across varied track conditions.",
-      "Stochastic Simulations: Recognizing the inherent volatility in F1 racing—where weather, crashes, and mechanical failures routinely disrupt linear predictions—a robust Monte Carlo simulation engine was constructed. By running thousands of probability-weighted race scenarios, the system provided a statistical confidence interval for final points standings rather than fragile deterministic outcomes.",
-      "Business Intelligence Synthesis: Consolidated the output of the predictive models and stochastic simulations into a unified analytical dashboard. This comprehensive tool allows for dynamic scenario testing across the season, simulating the high-pressure data environments utilized by professional trackside strategists.",
+      "Overview: DATA-415 statistical analysis project on the 2024 Formula 1 season. Race-by-race scenario tests for championship points, with confidence bands instead of a single predicted table.",
+      "Problem: Points standings swing on weather, crashes, safety cars, and pit timing. A straight extrapolation of past results misses most of what actually moves championships.",
+      "Approach: Pulled telemetry, tire degradation, and pit-stop data from the OpenF1 API. Built kNN models to place drivers in performance tiers and linear regressions to relate pace to setup and track type. Ran Monte Carlo race simulations (thousands of scenarios with probability weights) to produce confidence bands on driver and constructor points.",
+      "Results: Workbook lets you test how a safety car or DNF reshapes title odds before committing to a race strategy. Confidence bands show how wide the championship race still is. Written report states assumptions so numbers are not read as prophecy.",
+      "Stack: Excel, OpenF1 API, kNN, linear regression, Monte Carlo simulation.",
     ],
     tags: ["Excel", "Monte Carlo", "kNN", "Linear Regression", "Scenario Forecasting"],
     files: [{ label: "Project Report", href: "/projects/f1-analysis/report.pdf" }],
@@ -392,12 +399,14 @@ export const projectItems: ProjectItem[] = [
     title: "NYC Rideshare Trips",
     category: "DATA-420 Final Project",
     imageSrc: nycRideshareThumbnail,
-    summary: "Comprehensive demand analysis and passenger clustering of New York City rideshare data using R.",
+    summary:
+      "Large-scale NYC rideshare study in R: clean messy trip data, cluster demand zones, and model fares and durations with trees and regression.",
     details: [
-      "Objective: Addressed the complex challenge of urban mobility by conducting a deep-dive predictive analysis on a massive dataset of continuous New York City rideshare trips. The project focused on understanding fare volatility, trip durations, and spatial demand patterns to mathematically optimize driver positioning across the five boroughs.",
-      "Exploratory Data Analysis: Executed a rigorous exploratory data analysis phase using R, handling missing values, identifying multi-borough outliers in fare data, and visualizing spatial-temporal trends. This foundational step surfaced crucial feature importance, distinguishing the driving forces of trip demand in a highly chaotic dataset.",
-      "Unsupervised Machine Learning: Developed and deployed k-means clustering algorithms to segment geographic zones based on high-intensity trip origins and destinations. By mathematically quantifying these hotspots, the analysis provided actionable insights into where and when fleets should be deployed to minimize passenger wait times and maximize ride utilization.",
-      "Supervised Predictive Workflows: Architected robust supervised learning pipelines, including classification decision trees and multivariate linear regression models. These advanced statistics were fine-tuned to predict exact trip durations and expected fares based on time of day and external traffic variables, ultimately culminating in an intricate technical report.",
+      "Overview: DATA-420 predictive analytics final on NYC rideshare trips. Millions of messy records across boroughs, so cleaning and plotting came before any model work.",
+      "Problem: Operators need to know where trips originate, how fares and durations vary by time and borough, and which zones deserve staged drivers during peak windows.",
+      "Approach: Started with EDA in R (missing values, fare outliers, borough-level patterns, time-of-day charts). Applied k-means on pickup and dropoff intensity to label high-demand zones. Trained decision trees and multivariate regression models to predict trip duration and fare from time, location, and related features.",
+      "Results: Report tells operators which boroughs and time windows justify staging drivers and where extra cars sit idle. Shorter waits in hot zones; less wasted mileage in flat ones. Maps and cluster write-ups back the recommendations.",
+      "Stack: R, k-means clustering, decision trees, multivariate regression, EDA.",
     ],
     tags: ["R", "k-Means Clustering", "Decision Trees", "Regression", "Exploratory Data Analysis"],
     files: [{ label: "Project Report", href: "/projects/nyc-rideshare/Final-Project.pdf" }],
@@ -407,12 +416,14 @@ export const projectItems: ProjectItem[] = [
     title: "Monetary Financing & COVID-19",
     category: "CE-825 Final Project",
     imageSrc: monographThumbnail,
-    summary: "Year-long Economics capstone analyzing Brazil's pandemic-era monetary financing and macroeconomic theory.",
+    summary:
+      "Year-long UNICAMP thesis comparing macro schools on Brazil's COVID-era monetary financing, backed by BCB and Treasury data.",
     details: [
-      "Capstone Scope: Developed over a full academic year, this monograph represents the culmination of the Bachelor's in Economics, merging high-level macroeconomic theory with qualitative empirical validation.",
-      "Theoretical Analysis: Conducted a comparative study of the Campinas School, the UFRJ Political Economy Group, and Orthodox perspectives on the fiscal costs and institutional risks of monetary financing.",
-      "Empirical Review: Analyzed historical datasets from the Central Bank of Brazil (BCB) and National Treasury to quantify shifts in the monetary base and repo operations during the pandemic.",
-      "Institutional Policy: Evaluated the trade-offs between debt issuance and monetary financing within Brazil's unique 'Emergency Regime' (War Budget) framework.",
+      "Overview: CE-825 bachelor's monograph developed over two semesters at UNICAMP. Links macro theory to Brazil's pandemic fiscal response with BCB and Treasury data.",
+      "Problem: Brazil's federal government expanded spending during COVID while debate continued over monetary financing, debt issuance, and institutional limits under the Emergency Regime (War Budget).",
+      "Approach: Compared Campinas School, UFRJ political economy, and orthodox readings on the costs and risks of monetary financing. Pulled BCB and National Treasury series on the monetary base, repo operations, and related fiscal flows through 2020–2021.",
+      "Results: Defended thesis (Portuguese monograph and slides) that frames Brazil's COVID financing choices for readers who care about inflation risk, debt stock, and what the Emergency Regime allowed. Useful for anyone comparing central-bank purchases to Treasury issuance in that period.",
+      "Stack: Macroeconomic theory, econometric descriptive analysis, BCB/Treasury public data.",
     ],
     tags: ["Macroeconomics", "Public Finance", "Monetary Policy", "Economic Theory"],
     files: [
@@ -425,12 +436,14 @@ export const projectItems: ProjectItem[] = [
     title: "2024 Fortune 1000 Companies",
     category: "CE-874 Final Project",
     imageSrc: fortuneThumbnail,
-    summary: "Multi-model machine learning pipeline to forecast revenue growth and market ranking shifts for Fortune 1000 companies.",
+    summary:
+      "Team econometrics-meets-ML project: forecast Fortune 1000 revenue growth and rank moves with Random Forest, SVR, and MLP models in Python.",
     details: [
-      "Project Goal: Led the statistical modeling phase for a multidisciplinary team tasked with forecasting revenue growth and market rank shifts of the 2024 Fortune 1000 cohort. The project required harmonizing substantial amounts of corporate financial data to uncover the underlying metrics dictating an enterprise's upward or downward mobility in the rankings.",
-      "Model Engineering (Scikit-Learn): Built a robust machine learning pipeline utilizing an ensemble of advanced techniques. This architecture integrated Random Forest regressors, Support Vector Regressors (SVR), and Multi-layer Perceptrons (MLP), each tailored to capture both the linear relationships of established physical industries and the non-linear volatility of the tech sector.",
-      "Optimization & Diagnostics: Implemented rigorous grid search protocols and cross-validation techniques to fine-tune model hyperparameters, ensuring they generalized smoothly to unseen data while avoiding overfitting. Extracted feature importance metrics to explain to non-technical stakeholders which financial levers (e.g., debt ratios, R&D spend) were driving the algorithms' final predictions.",
-      "Collaboration & Integration: Functioned as the lead data integrator within a team of four students, establishing a unified data conforming pipeline. Standardized the preprocessing of incomplete financial filings prior to synthesis into a cohesive machine learning report detailing strategic market movements.",
+      "Overview: CE-874 (intro data science) team project with four students. I owned the modeling pipeline and most of the data cleaning before we merged sections into one report.",
+      "Problem: Fortune 1000 rank changes depend on noisy financial filings with missing fields and sector-specific behavior. Tech firms move differently from heavy industry.",
+      "Approach: Aligned revenue, debt, R&D, and related ratios across companies. Trained Random Forest, SVR, and MLP regressors in scikit-learn, with grid search and cross-validation to limit overfit. Compared feature importance by sector (debt load, R&D spend, and similar inputs) against rank movement.",
+      "Results: Team report shows which financial ratios tracked Fortune 1000 rank moves by sector, so predictions come with a plain-language reason (R&D spend, debt load, and similar inputs). Helps an analyst spot warning signs in filings before rank changes hit the published list.",
+      "Stack: Python, Scikit-Learn, Random Forest, SVR, MLP, pandas.",
     ],
     tags: ["Python", "Scikit-Learn", "Neural Networks", "Random Forest", "SVR"],
     files: [{ label: "Project Report", href: "/projects/fortune-1000/report.pdf" }],
@@ -440,12 +453,14 @@ export const projectItems: ProjectItem[] = [
     title: "COVID-19 Impact Analysis of Brazil’s Federal Revenues",
     category: "CE-442 Final Project",
     imageSrc: covidImpactThumbnail,
-    summary: "Time-series impact analysis of Brazil's federal tax revenues using Box-Jenkins methodology in R.",
+    summary:
+      "Econometrics paper using SARIMA and intervention analysis to measure how COVID lockdowns cut Brazil's federal tax receipts compared to the pre-pandemic trend.",
     details: [
-      "Macroeconomic Context: Investigated the severe fiscal shock caused by the COVID-19 pandemic on Brazil's federal tax revenues. As a core requirement for upper-level econometrics work, the project aimed to cleanly separate the organic economic trajectories of the early 2020s from the acute, unprecedented financial impact of nationwide lockdowns.",
-      "Time-Series Architecture: Applied rigorous Box-Jenkins methodology in R to model historical federal tax receipts. Built and calibrated Seasonal ARIMA (SARIMA) models to establish a highly accurate 'business-as-usual' counterfactual—mathematically projecting what tax revenues would have been had the pandemic never occurred.",
-      "Intervention Analysis: Executed a complex intervention analysis by measuring the delta between the SARIMA counterfactual predictions and the actual observed revenues during the pandemic constraint months. This allowed for an objective quantification of the fiscal deficit directly attributable to the public health crisis.",
-      "Statistical Rigor: Ensured the absolute validity of the findings by subjecting the model residuals to strict diagnostic testing (e.g., Ljung-Box test, normality checks, and stationary variance analysis). The resulting paper provided a mathematically sound empirical foundation for evaluating the efficacy of the government's subsequent emergency economic stimulus policies.",
+      "Overview: CE-442 methods project on Brazilian federal tax revenue during COVID. The assignment called for time-series modeling, not a chart of receipts trending down.",
+      "Problem: Lockdowns hit collections hard, but revenue was already on a path before 2020. The analysis needed to separate the pandemic shock from the underlying trend.",
+      "Approach: Fit seasonal ARIMA models in R on pre-pandemic monthly receipts (Box-Jenkins workflow). Used the fitted series as a counterfactual for what revenue would have been without COVID. Measured the gap between counterfactual and actuals during lockdown months as the intervention effect.",
+      "Results: Paper puts a monthly figure on how much federal tax revenue lockdowns cost above the pre-COVID trend, which matters for sizing emergency spending and later tax debates. Residual checks (Ljung-Box, normality, variance) are documented before the policy section.",
+      "Stack: R, SARIMA/ARIMA, intervention analysis, Box-Jenkins methodology.",
     ],
     tags: ["R", "ARIMA/SARIMA", "Time Series", "Fiscal Analysis", "Forecasting"],
     files: [{ label: "Project Report", href: "/projects/covid-impact/report.pdf" }],
