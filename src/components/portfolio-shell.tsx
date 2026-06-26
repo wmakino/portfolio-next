@@ -5,8 +5,10 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
 import {
+  certificationItems,
   navItems,
   profile,
+  type CertificationItem,
   type ProjectItem,
   projectItems,
   skillGroups,
@@ -216,6 +218,78 @@ function Flag({ code }: { code: "CA" | "BR" }) {
   );
 }
 
+function AccoladeBadge({
+  label,
+  variant = "honours",
+}: {
+  label: string;
+  variant?: "honours" | "in-progress";
+}) {
+  const inProgress = variant === "in-progress";
+  return (
+    <span
+      className={`ml-1 font-normal ${inProgress ? "text-[var(--in-progress)]" : "text-[var(--honours)]"}`}
+    >
+      {inProgress ? `(${label})` : `with ${label}`}
+    </span>
+  );
+}
+
+function CertificationCard({ item, theme }: { item: CertificationItem; theme: "light" | "dark" }) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="flex h-full gap-3 rounded-lg border border-[var(--border)] bg-[color:var(--surface)] p-3.5 shadow-[var(--shadow)] sm:gap-4 sm:p-4"
+    >
+      <div
+        className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border sm:h-16 sm:w-16 ${
+          theme === "light"
+            ? "border-[color:color-mix(in_srgb,var(--foreground)_28%,transparent)]"
+            : "border-[var(--border)]"
+        }`}
+      >
+        <Image
+          src={item.logo}
+          alt={`${item.issuer} logo`}
+          width={100}
+          height={100}
+          unoptimized
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <span className={metaLabel}>Issued {item.issued}</span>
+          {item.credentialUrl ? (
+            <a
+              href={item.credentialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center justify-center rounded-md border border-[var(--border)] px-2 py-0.5 text-[10px] font-medium normal-case leading-none tracking-normal text-[var(--body)] transition hover:bg-[color:var(--surface-elevated)]"
+            >
+              View credential
+            </a>
+          ) : null}
+        </div>
+        <h3 className="mt-1 text-base font-semibold leading-snug sm:text-lg">{item.title}</h3>
+        <p className="mt-0.5 text-sm font-medium text-[var(--accent)]">{item.issuer}</p>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {item.tags.map((tag) => (
+            <span key={tag} className={tagPill}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function TimelineRow({
   item,
   theme,
@@ -242,6 +316,7 @@ function TimelineRow({
               src={theme === "dark" ? item.logo.dark : item.logo.light}
               alt={item.institution ?? item.title}
               fill
+              sizes="(max-width: 640px) 56px, 80px"
               className="object-contain"
             />
           </div>
@@ -253,7 +328,7 @@ function TimelineRow({
               <h3 className="mt-1 text-lg font-semibold sm:text-xl">
                 {item.title}
                 {item.accolade && (
-                  <span className="ml-1 font-normal text-[var(--honours)]">with {item.accolade}</span>
+                  <AccoladeBadge label={item.accolade} variant={item.accoladeVariant} />
                 )}
               </h3>
               {(item.institution || (item.type === "work" && item.location)) && (
@@ -580,6 +655,14 @@ export function PortfolioShell() {
             </div>
           </Section>
 
+          <Section id="certifications" title="Certifications">
+            <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
+              {certificationItems.map((item) => (
+                <CertificationCard key={item.slug} item={item} theme={theme} />
+              ))}
+            </div>
+          </Section>
+
           <Section id="projects" title="Projects">
             <div className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
               {projectItems.map((project) => (
@@ -690,6 +773,7 @@ export function PortfolioShell() {
                         src={theme === "dark" ? currentTimeline.logo.dark : currentTimeline.logo.light}
                         alt={currentTimeline.institution ?? ""}
                         fill
+                        sizes="80px"
                         className="object-contain"
                       />
                     </div>
@@ -701,7 +785,10 @@ export function PortfolioShell() {
                     <h3 className="mt-1 text-lg font-semibold leading-snug sm:mt-2 sm:text-2xl">
                       {currentItem.title}
                       {currentTimeline?.accolade && (
-                        <span className="ml-1 font-normal text-[var(--honours)]">with {currentTimeline.accolade}</span>
+                        <AccoladeBadge
+                          label={currentTimeline.accolade}
+                          variant={currentTimeline.accoladeVariant}
+                        />
                       )}
                     </h3>
                     {currentTimeline?.institution && (

@@ -32,6 +32,7 @@ export type TimelineItem = {
   location: string;
   country?: "CA" | "BR";
   accolade?: string;
+  accoladeVariant?: "honours" | "in-progress";
   logo?: {
     light: string;
     dark: string;
@@ -56,6 +57,16 @@ export type ProjectItem = {
   }>;
 };
 
+export type CertificationItem = {
+  slug: string;
+  title: string;
+  issuer: string;
+  issued: string;
+  logo: string;
+  credentialUrl?: string;
+  tags: string[];
+};
+
 export const profile = {
   name: "William Makino",
   role: "Artificial Intelligence, Data Science and Economics",
@@ -72,6 +83,7 @@ export const socialLinks: SocialLink[] = [
 export const navItems = [
   { label: "Skills", id: "skills" },
   { label: "Education", id: "education" },
+  { label: "Certifications", id: "certifications" },
   { label: "Projects", id: "projects" },
   { label: "Work", id: "work" },
   { label: "Contact", id: "contact" },
@@ -102,6 +114,8 @@ export const timelineItems: TimelineItem[] = [
     period: "Jan 2026 - Aug 2026",
     title: "Integrated AI Post-diploma Certificate",
     institution: "Southern Alberta Institute of Technology (SAIT)",
+    accolade: "in progress",
+    accoladeVariant: "in-progress",
     location: "Calgary, Alberta",
     country: "CA",
     logo: {
@@ -268,7 +282,7 @@ export const timelineItems: TimelineItem[] = [
     slug: "best-buy-advisor",
     type: "work",
     period: "Nov 2025 – Dec 2025",
-    title: "Computing Solutions Advisor",
+    title: "Computing Solutions Advisor (Seasonal)",
     location: "Best Buy Canada",
     summary: "Holiday contract in Best Buy's computing department: consultative sales during Black Friday and Boxing Day rushes.",
     details: [
@@ -290,6 +304,115 @@ export const timelineItems: TimelineItem[] = [
       "Most clients needed patience more than technical depth: repeating steps, writing things down, and building confidence with devices they already owned.",
     ],
     tags: ["1:1 Instruction", "System Troubleshooting", "Windows OS", "Mobile Platforms", "Cybersecurity Basics", "Digital Literacy"],
+  },
+];
+
+export const certificationItems: CertificationItem[] = [
+  {
+    slug: "databricks-genai",
+    title: "Generative AI Fundamentals",
+    issuer: "Databricks",
+    issued: "Aug 2025",
+    logo: "/images/logos/certs/databricks.png",
+    credentialUrl: "https://credentials.databricks.com/eadbe788-3126-4acc-a4ba-d06b2be98736",
+    tags: ["Generative AI", "LLMs", "Databricks"],
+  },
+  {
+    slug: "ielts-8",
+    title: "IELTS Academic 8.0",
+    issuer: "IELTS Official",
+    issued: "Aug 2024",
+    logo: "/images/logos/certs/ielts.png",
+    tags: ["English"],
+  },
+  {
+    slug: "alteryx-designer-core",
+    title: "Alteryx Designer Core Certified",
+    issuer: "Alteryx",
+    issued: "Jul 2024",
+    logo: "/images/logos/certs/alteryx.png",
+    credentialUrl: "https://www.credly.com/badges/6709f041-fd9b-4b3f-b8ef-0eaa3c12d025/linked_in_profile",
+    tags: ["Alteryx", "Data Analytics", "ETL"],
+  },
+  {
+    slug: "azure-ai-fundamentals",
+    title: "AI-900: Azure AI Fundamentals",
+    issuer: "Microsoft",
+    issued: "May 2024",
+    logo: "/images/logos/certs/microsoft.png",
+    credentialUrl:
+      "https://learn.microsoft.com/api/credentials/share/en-gb/wmakino/6A90AE0962DD3313?sharingId=FEF3035517876BE0",
+    tags: ["Microsoft Azure", "Artificial Intelligence"],
+  },
+  {
+    slug: "azure-fundamentals",
+    title: "AZ-900: Azure Fundamentals",
+    issuer: "Microsoft",
+    issued: "May 2024",
+    logo: "/images/logos/certs/microsoft.png",
+    credentialUrl:
+      "https://learn.microsoft.com/api/credentials/share/en-gb/wmakino/2FB360F7720BE6AC?sharingId=FEF3035517876BE0",
+    tags: ["Microsoft Azure", "Cloud Computing"],
+  },
+  {
+    slug: "power-bi-analyst",
+    title: "PL-300: Power BI Data Analyst Associate",
+    issuer: "Microsoft",
+    issued: "Mar 2024",
+    logo: "/images/logos/certs/microsoft.png",
+    credentialUrl:
+      "https://learn.microsoft.com/api/credentials/share/en-gb/wmakino/722F1669FEA53A33?sharingId=FEF3035517876BE0",
+    tags: ["Microsoft Power BI", "Data Analytics"],
+  },
+  {
+    slug: "datacamp-analyst",
+    title: "Data Analyst Associate",
+    issuer: "DataCamp",
+    issued: "Nov 2023",
+    logo: "/images/logos/certs/datacamp.png",
+    credentialUrl: "https://www.datacamp.com/certificate/DAA0019539704178",
+    tags: ["Data Management", "Data Analytics", "SQL", "Python"],
+  },
+  {
+    slug: "enap-r-analysis",
+    title: "Data Analysis in R",
+    issuer: "ENAP — National School of Public Administration",
+    issued: "Oct 2023",
+    logo: "/images/logos/certs/enap.png",
+    tags: ["Data Analytics", "R"],
+  },
+  {
+    slug: "google-data-analytics",
+    title: "Google Data Analytics",
+    issuer: "Google",
+    issued: "Sep 2023",
+    logo: "/images/logos/certs/google.png",
+    credentialUrl: "https://www.coursera.org/share/ed08929d9c7ee82f21c3aaf2060e8fa9",
+    tags: ["Data Analytics", "pandas", "SQL"],
+  },
+  {
+    slug: "extecamp-fundamental-analysis",
+    title: "Fundamental Analysis",
+    issuer: "Extecamp — UNICAMP",
+    issued: "Nov 2022",
+    logo: "/images/logos/certs/extecamp.png",
+    tags: ["Valuation", "Finance"],
+  },
+  {
+    slug: "ef-set-c2",
+    title: "EF SET English Certificate 81/100 (C2 Proficient)",
+    issuer: "EF SET",
+    issued: "Aug 2022",
+    logo: "/images/logos/certs/ef-set.png",
+    tags: ["English"],
+  },
+  {
+    slug: "ielts-7-5",
+    title: "IELTS Academic 7.5",
+    issuer: "IELTS Official",
+    issued: "Feb 2018",
+    logo: "/images/logos/certs/ielts.png",
+    tags: ["English"],
   },
 ];
 

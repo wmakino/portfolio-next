@@ -15,6 +15,7 @@
   --pill-bg: #e7ddd0;
   --pill-fg: #3f3a32;
   --honours: #c2410c;
+  --in-progress: #0369a1;
   --bg-gradient: radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 40%), radial-gradient(circle at 80% 15%, rgba(14, 116, 144, 0.08), transparent 42%), radial-gradient(circle at 18% 70%, rgba(194, 65, 12, 0.06), transparent 46%), linear-gradient(135deg, rgba(255, 250, 243, 0.9), rgba(245, 240, 232, 0.9));
   color-scheme: light;
 }
@@ -34,6 +35,7 @@ html.dark {
   --pill-bg: rgba(146, 184, 168, 0.14);
   --pill-fg: #b8d4ca;
   --honours: #d4b06a;
+  --in-progress: #7dd3fc;
   --bg-gradient: radial-gradient(circle at 12% 8%, rgba(146, 184, 168, 0.09), transparent 52%), radial-gradient(circle at 88% 82%, rgba(212, 176, 106, 0.07), transparent 48%), radial-gradient(circle at 72% 18%, rgba(148, 168, 188, 0.05), transparent 44%), linear-gradient(180deg, rgba(24, 23, 22, 0.97), rgba(20, 19, 18, 1));
   color-scheme: dark;
 }
