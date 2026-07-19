@@ -1,9 +1,10 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
+import { ProjectMark } from "@/components/project-marks";
 import {
   certificationItems,
   navItems,
@@ -27,22 +28,6 @@ function modalFromSearchParams(params: { get: (key: string) => string | null }):
   return null;
 }
 
-const overlayClass = "fixed inset-0 flex items-center justify-center bg-black/55 p-3 sm:p-4";
-const modalPanelClass =
-  "flex max-h-[min(88dvh,900px)] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[color:var(--surface-elevated)] shadow-[var(--shadow)]";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const tagPill =
-  "rounded-md bg-[var(--pill-bg)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--pill-fg)] sm:px-3";
-const btnOutline =
-  "rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm transition hover:bg-[color:var(--surface-elevated)]";
-const bodyText = "text-sm leading-6 text-[var(--body)]";
-const metaLabel = "text-xs uppercase tracking-[0.22em] text-[var(--accent-secondary)]";
-
 const themeStorageKey = "portfolio-theme";
 
 function getFileIcon(href: string) {
@@ -56,11 +41,17 @@ function getFileIcon(href: string) {
 
 const isImageHref = (href: string) => /\.(png|jpg|jpeg|svg|webp|gif|avif)$/i.test(href);
 
+/** Interactive HTML demos use a widescreen viewer; PDFs/slides/notebooks stay tall. */
+function isWebDemoFile(file: { href: string; icon?: string }) {
+  if (file.icon === "window") return true;
+  return /\.html?$/i.test(file.href) && /(lending_form|sign-in|ai-grading-system)/i.test(file.href);
+}
+
 function readThemeSnapshot(): "light" | "dark" {
-  if (typeof window === "undefined") return "light";
+  if (typeof window === "undefined") return "dark";
   const stored = window.localStorage.getItem(themeStorageKey);
   if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "dark";
 }
 
 function subscribeToTheme(callback: () => void) {
@@ -104,17 +95,19 @@ function isSectionLabel(prefix: string, isBullet: boolean): boolean {
   if (/^Overview$/i.test(label)) return true;
   if (/^Semester .+$/i.test(label)) return true;
   if (/^Completed .+$/i.test(label)) return true;
-  if (/^(Problem|Approach|Results|Outcome|Stack|Notes|Context|Deliverables|Method|Build|Team|Ethics)$/i.test(label)) return true;
+  if (
+    /^(Problem|Approach|Results|Outcome|Stack|Notes|Context|Deliverables|Method|Build|Team|Ethics)$/i.test(
+      label,
+    )
+  ) {
+    return true;
+  }
 
-  // Sentence-shaped lines are body copy, not headers.
   if (/\b(the|and|with|for|from|that|this|cover|courses|program|needed|is an|clients)\b/i.test(label)) {
     return false;
   }
 
-  // Project detail headers like "Machine Learning (DATA-440)" or "Geospatial (Python & GeoPandas)".
   if (/^[A-Z0-9][^:]{0,40}\([^)]+\)$/.test(label)) return true;
-
-  // Short title-style headers (Sorting, Dashboard, Stack, UX, etc.).
   if (label.length <= 28 && /^[A-Z]/.test(label)) return true;
 
   return false;
@@ -146,9 +139,8 @@ function parseDetails(details: string[]) {
 
 function DetailBlocks({ details, modalType }: { details: string[]; modalType: ModalType | null }) {
   const blocks = parseDetails(details);
-  const gridable = (label: string | null) => modalType === "timeline" && label && label.toLowerCase() !== "overview";
-  const labelClass =
-    "block font-bold text-[var(--accent)] uppercase tracking-widest text-[11px] sm:text-[12px]";
+  const gridable = (label: string | null) =>
+    modalType === "timeline" && label && label.toLowerCase() !== "overview";
   const nodes: React.ReactNode[] = [];
 
   for (let i = 0; i < blocks.length; i++) {
@@ -160,9 +152,9 @@ function DetailBlocks({ details, modalType }: { details: string[]; modalType: Mo
         <div key={`g-${block.id}`} className="mb-6 grid grid-cols-1 gap-6 sm:mb-8 sm:grid-cols-2 sm:gap-8">
           {[block, next as (typeof blocks)[0]].map((b) => (
             <div key={b.id} className="space-y-2 sm:space-y-3">
-              <span className={labelClass}>{b.label}</span>
+              <span className="detail-label">{b.label}</span>
               <div className="space-y-0.5 text-left">
-                {b.value ? <p className="text-[var(--body)]">{b.value}</p> : null}
+                {b.value ? <p>{b.value}</p> : null}
                 {b.items.map((item, idx) => (
                   <p key={idx} className={item.trim().startsWith("•") ? "pl-5 -indent-5" : undefined}>
                     {item}
@@ -182,13 +174,9 @@ function DetailBlocks({ details, modalType }: { details: string[]; modalType: Mo
 
     nodes.push(
       <div key={block.id} className="mb-6 space-y-3 sm:mb-8 sm:space-y-4">
-        {block.label && <span className={labelClass}>{block.label}</span>}
-        <div className="space-y-3 text-left sm:space-y-4 sm:text-justify">
-          {block.value && (
-            <p className={!block.label ? "leading-relaxed text-[var(--body)]" : "mt-1 text-[var(--body)]"}>
-              {block.value}
-            </p>
-          )}
+        {block.label && <span className="detail-label">{block.label}</span>}
+        <div className="space-y-3 text-left sm:space-y-4">
+          {block.value && <p className={!block.label ? "leading-relaxed" : "mt-1"}>{block.value}</p>}
           <div className={spacedItems ? "space-y-3 sm:space-y-4" : "space-y-0.5"}>
             {block.items.map((item, idx) => (
               <p key={idx} className={item.trim().startsWith("•") ? "pl-5 -indent-5" : undefined}>
@@ -206,7 +194,7 @@ function DetailBlocks({ details, modalType }: { details: string[]; modalType: Mo
 
 function Flag({ code }: { code: "CA" | "BR" }) {
   return (
-    <div className="relative h-[20px] w-[26px] shrink-0 overflow-hidden sm:h-[24px] sm:w-[31px]">
+    <div className="relative h-[18px] w-[24px] shrink-0 overflow-hidden">
       <Image
         src={code === "CA" ? "/images/flags/canada.png" : "/images/flags/brazil.png"}
         alt={code === "CA" ? "Canada flag" : "Brazil flag"}
@@ -227,151 +215,128 @@ function AccoladeBadge({
 }) {
   const inProgress = variant === "in-progress";
   return (
-    <span
-      className={`ml-1 font-normal ${inProgress ? "text-[var(--in-progress)]" : "text-[var(--honours)]"}`}
-    >
-      {inProgress ? `(${label})` : `with ${label}`}
+    <span className={`accolade ${inProgress ? "accolade--progress" : ""}`}>
+      {inProgress ? ` (${label})` : ` with ${label}`}
     </span>
   );
 }
 
-function CertificationCard({ item, theme }: { item: CertificationItem; theme: "light" | "dark" }) {
+function CertificationRow({ item, index }: { item: CertificationItem; index: number }) {
   return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className="flex h-full gap-3 rounded-lg border border-[var(--border)] bg-[color:var(--surface)] p-3.5 shadow-[var(--shadow)] sm:gap-4 sm:p-4"
-    >
-      <div
-        className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border sm:h-16 sm:w-16 ${
-          theme === "light"
-            ? "border-[color:color-mix(in_srgb,var(--foreground)_28%,transparent)]"
-            : "border-[var(--border)]"
-        }`}
-      >
+    <article className="cert-row">
+      <span className="index-row__num">{String(index + 1).padStart(2, "0")}</span>
+      <div className="cert-row__logo">
         <Image
           src={item.logo}
           alt={`${item.issuer} logo`}
-          width={100}
-          height={100}
+          width={56}
+          height={56}
           unoptimized
           loading="lazy"
           className="h-full w-full object-cover"
         />
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <span className={metaLabel}>Issued {item.issued}</span>
+      <div className="cert-row__body">
+        <div className="cert-row__meta">
+          <p className="cert-row__issued">Issued {item.issued}</p>
           {item.credentialUrl ? (
             <a
               href={item.credentialUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center justify-center rounded-md border border-[var(--border)] px-2 py-0.5 text-[10px] font-medium normal-case leading-none tracking-normal text-[var(--body)] transition hover:bg-[color:var(--surface-elevated)]"
+              className="cert-row__link link-underline"
             >
               View credential
             </a>
           ) : null}
         </div>
-        <h3 className="mt-1 text-base font-semibold leading-snug sm:text-lg">{item.title}</h3>
-        <p className="mt-0.5 text-sm font-medium text-[var(--accent)]">{item.issuer}</p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {item.tags.map((tag) => (
-            <span key={tag} className={tagPill}>
-              {tag}
-            </span>
-          ))}
-        </div>
+        <h3 className="cert-row__title">{item.title}</h3>
+        <p className="cert-row__issuer">{item.issuer}</p>
       </div>
-    </motion.div>
+    </article>
   );
 }
 
 function TimelineRow({
   item,
   theme,
+  index,
   onOpen,
 }: {
   item: TimelineItem;
   theme: "light" | "dark";
+  index: number;
   onOpen: () => void;
 }) {
   const showLogo = item.type === "education" && item.logo;
 
   return (
-    <motion.button
-      type="button"
-      onClick={onOpen}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.995 }}
-      className="w-full rounded-lg border border-[var(--border)] bg-[color:var(--surface)] p-3.5 text-left shadow-[var(--shadow)] transition hover:bg-[color:var(--surface-elevated)] sm:p-4"
-    >
-      <div className="flex gap-3 sm:gap-6">
-        {showLogo && item.logo && (
-          <div className="relative h-14 w-14 shrink-0 sm:h-20 sm:w-20">
-            <Image
-              src={theme === "dark" ? item.logo.dark : item.logo.light}
-              alt={item.institution ?? item.title}
-              fill
-              sizes="(max-width: 640px) 56px, 80px"
-              className="object-contain"
-            />
-          </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
-            <div className="min-w-0">
-              <p className={metaLabel}>{item.period}</p>
-              <h3 className="mt-1 text-lg font-semibold sm:text-xl">
+    <button type="button" onClick={onOpen} className="index-row">
+      <span className="index-row__num">{String(index + 1).padStart(2, "0")}</span>
+      <div className="min-w-0">
+        <div className="flex items-start gap-3">
+          {showLogo && item.logo ? (
+            <div className="relative mt-0.5 hidden h-11 w-11 shrink-0 sm:block">
+              <Image
+                src={theme === "dark" ? item.logo.dark : item.logo.light}
+                alt={item.institution ?? item.title}
+                fill
+                sizes="44px"
+                className="object-contain"
+              />
+            </div>
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <div className="index-row__top">
+              <h3 className="index-row__title">
                 {item.title}
-                {item.accolade && (
+                {item.accolade ? (
                   <AccoladeBadge label={item.accolade} variant={item.accoladeVariant} />
-                )}
+                ) : null}
               </h3>
-              {(item.institution || (item.type === "work" && item.location)) && (
-                <p className="mt-0.5 text-sm font-medium text-[var(--accent)]">
-                  {item.institution ?? item.location}
-                </p>
+              {item.type === "education" ? (
+                <span className="index-row__place">
+                  <span className="truncate">{item.location}</span>
+                  {item.country ? <Flag code={item.country} /> : null}
+                </span>
+              ) : (
+                <span className="index-row__place">{item.period}</span>
               )}
             </div>
-            {item.type === "education" && (
-              <div className="flex shrink-0 items-center gap-1 text-sm font-medium text-[var(--accent-secondary)]">
-                <span className="truncate">{item.location}</span>
-                {item.country && <Flag code={item.country} />}
-              </div>
+            {(item.institution || (item.type === "work" && item.location)) && (
+              <p className="index-row__meta">
+                {item.type === "education" ? item.period : null}
+                {item.type === "education" && item.institution ? " · " : null}
+                {item.institution ?? item.location}
+              </p>
             )}
-          </div>
-          <p className={`mt-2 sm:mt-3 ${bodyText}`}>{item.summary}</p>
-          <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
-            {item.tags.map((tag) => (
-              <span key={tag} className={tagPill}>
-                {tag}
-              </span>
-            ))}
+            <p className="index-row__summary">{item.summary}</p>
+            <ul className="index-row__tags">
+              {item.tags.slice(0, 4).map((tag) => (
+                <li key={tag}>{tag}</li>
+              ))}
+            </ul>
+            <span className="index-row__open">Open →</span>
           </div>
         </div>
       </div>
-    </motion.button>
+    </button>
   );
 }
 
 export function PortfolioShell() {
   const searchParams = useSearchParams();
-  const theme = useSyncExternalStore(subscribeToTheme, readThemeSnapshot, () => "light" as const);
+  const reduceMotion = useReducedMotion();
+  const theme = useSyncExternalStore(subscribeToTheme, readThemeSnapshot, () => "dark" as const);
 
   const [activeModal, setActiveModal] = useState<SelectedItem>(() => modalFromSearchParams(searchParams));
-  const [activeFileViewer, setActiveFileViewer] = useState<{ title: string; href: string } | null>(null);
-  const [activeSection, setActiveSection] = useState("");
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [activeFileViewer, setActiveFileViewer] = useState<{
+    title: string;
+    href: string;
+    wide?: boolean;
+  } | null>(null);
 
-  const modalOverlayRef = useRef<HTMLDivElement>(null);
   const modalScrollRef = useRef<HTMLDivElement>(null);
-  const fileViewerOverlayRef = useRef<HTMLDivElement>(null);
-  const fileIframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -380,48 +345,6 @@ export function PortfolioShell() {
   useEffect(() => {
     if (activeModal && modalScrollRef.current) modalScrollRef.current.scrollTop = 0;
   }, [activeModal]);
-
-  useEffect(() => {
-    const onScroll = () => {
-      setIsScrolled(window.scrollY > 8);
-
-      const docHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-      const maxScroll = Math.max(1, docHeight - window.innerHeight);
-
-      if (window.scrollY + window.innerHeight >= docHeight - 2) {
-        setActiveSection(navItems[navItems.length - 1]?.id ?? "");
-        return;
-      }
-
-      const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
-      let best = navItems[0]?.id ?? "";
-      let bestDist = Infinity;
-
-      for (const nav of navItems) {
-        const el = document.getElementById(nav.id);
-        if (!el) continue;
-        const rect = el.getBoundingClientRect();
-        const sectionProgress = Math.min(
-          1,
-          Math.max(0, (rect.top + window.scrollY + rect.height * 0.5 - window.innerHeight * 0.34) / maxScroll),
-        );
-        const dist = Math.abs(sectionProgress - progress);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = nav.id;
-        }
-      }
-      setActiveSection(best);
-    };
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
 
   const currentItem = useMemo(() => {
     if (!activeModal) return null;
@@ -435,10 +358,45 @@ export function PortfolioShell() {
 
   useEffect(() => {
     if (!overlayOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+
+    const isInsideScrollableModal = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false;
+      return Boolean(
+        target.closest(".modal-body, .modal-panel--file, .modal-panel--file-wide, .modal-panel--image"),
+      );
+    };
+
+    const blockPageScroll = (e: Event) => {
+      if (isInsideScrollableModal(e.target)) return;
+      e.preventDefault();
+    };
+
+    const blockPageKeys = (e: KeyboardEvent) => {
+      const keys = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "];
+      if (!keys.includes(e.key)) return;
+      if (isInsideScrollableModal(e.target)) return;
+      const tag = e.target instanceof HTMLElement ? e.target.tagName : "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      e.preventDefault();
+    };
+
+    const lockScrollY = window.scrollY;
+    const keepScrollPosition = () => {
+      if (window.scrollY !== lockScrollY) window.scrollTo(0, lockScrollY);
+    };
+
+    document.documentElement.classList.add("modal-scroll-lock");
+    window.addEventListener("wheel", blockPageScroll, { passive: false });
+    window.addEventListener("touchmove", blockPageScroll, { passive: false });
+    window.addEventListener("keydown", blockPageKeys);
+    window.addEventListener("scroll", keepScrollPosition, { passive: true });
+
     return () => {
-      document.body.style.overflow = prev;
+      document.documentElement.classList.remove("modal-scroll-lock");
+      window.removeEventListener("wheel", blockPageScroll);
+      window.removeEventListener("touchmove", blockPageScroll);
+      window.removeEventListener("keydown", blockPageKeys);
+      window.removeEventListener("scroll", keepScrollPosition);
     };
   }, [overlayOpen]);
 
@@ -468,367 +426,346 @@ export function PortfolioShell() {
     syncUrl(null);
   };
 
-  const openFile = (href: string, title: string) => {
-    setActiveFileViewer({ title, href });
+  const openFile = (href: string, title: string, wide = false) => {
+    setActiveFileViewer({ title, href, wide });
+  };
+
+  const education = timelineItems.filter((item) => item.type === "education");
+  const work = timelineItems.filter((item) => item.type === "work");
+  const year = new Date().getFullYear();
+
+  const tocHints: Record<string, string> = {
+    skills: `${skillGroups.length} groups`,
+    education: `${education.length} entries`,
+    certifications: `${certificationItems.length} credentials`,
+    projects: `${projectItems.length} selected`,
+    work: `${work.length} roles`,
+    contact: profile.location,
+  };
+
+  const modalMotion = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
   };
 
   return (
-    <div className="relative min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <div className="pointer-events-none absolute inset-0 bg-[var(--bg-gradient)]" />
-
-      <div className="relative mx-auto flex w-full max-w-[1344px] flex-col px-4 pb-[max(6rem,env(safe-area-inset-bottom))] pt-3 sm:px-8 sm:pb-32 sm:pt-5 lg:px-10">
-        <header
-          className={`sticky top-2 z-30 mb-8 rounded-xl border border-[var(--border)] shadow-[var(--shadow)] transition-all duration-300 sm:top-4 sm:mb-14 ${
-            isScrolled
-              ? "bg-[color:var(--surface)]/78 backdrop-blur-xl"
-              : "bg-[color:var(--surface)]/94 backdrop-blur-md"
-          }`}
+    <div className="page-shell">
+      <nav className="nav-rail" aria-label="Section navigation">
+        <a href="#top" className="nav-rail__wordmark">
+          {profile.name}
+        </a>
+        <ul className="nav-rail__dots">
+          {navItems.map((item) => (
+            <li key={item.id}>
+              <a href={`#${item.id}`} aria-label={item.label} title={item.label} />
+            </li>
+          ))}
+        </ul>
+        <button
+          type="button"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="nav-rail__theme"
         >
-          <div className="flex items-start justify-between gap-3 px-3 py-3 lg:hidden">
-            <div className="min-w-0 flex-1">
-              <h1 className="text-sm font-semibold leading-snug sm:text-base">{profile.name}</h1>
-              <p className="mt-0.5 text-[10px] uppercase tracking-[0.24em] text-[var(--accent)] sm:text-xs">
-                Portfolio
-              </p>
-            </div>
+          {theme === "dark" ? "Light" : "Dark"}
+        </button>
+      </nav>
+
+      <div className="page-frame">
+        <header className="nav-mobile">
+          <a href="#top" className="nav-mobile__wordmark">
+            {profile.name}
+          </a>
+          <div className="nav-mobile__actions">
             <button
               type="button"
-              onClick={() => setMobileNavOpen((open) => !open)}
-              aria-expanded={mobileNavOpen}
-              aria-controls="mobile-nav-panel"
-              className={`${btnOutline} shrink-0 px-3 py-2`}
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="btn btn--text"
             >
-              {mobileNavOpen ? "Close" : "Menu"}
+              {theme === "dark" ? "Light" : "Dark"}
             </button>
-          </div>
-
-          {mobileNavOpen ? (
-            <nav
-              id="mobile-nav-panel"
-              className="border-t border-[var(--border)] px-3 py-3 lg:hidden"
-            >
-              <div className="flex flex-wrap gap-2 text-sm text-[var(--body)]">
-                {navItems.map((item) => (
-                  <a
-                    key={item.id}
-                    href={`#${item.id}`}
-                    onClick={() => setMobileNavOpen(false)}
-                    className={`rounded-lg px-3 py-2 transition-colors ${
-                      activeSection === item.id
-                        ? "border border-[var(--border)] bg-[color:var(--surface-elevated)] text-[var(--foreground)]"
-                        : "hover:text-[var(--foreground)]"
-                    }`}
-                  >
-                    {item.label}
-                  </a>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className={btnOutline}
-                >
-                  {theme === "dark" ? "Light mode" : "Dark mode"}
-                </button>
-              </div>
-            </nav>
-          ) : null}
-
-          <div className="hidden items-center justify-between gap-6 px-4 py-4 lg:flex">
-            <div className="shrink-0">
-              <h1 className="text-lg font-semibold tracking-tight">{profile.name}</h1>
-              <p className="text-xs uppercase tracking-[0.28em] text-[var(--accent)]">Portfolio</p>
-            </div>
-            <nav className="flex min-w-0 flex-wrap items-center justify-end gap-2 text-sm text-[var(--body)]">
-              {navItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={`#${item.id}`}
-                  className={`relative rounded-lg px-3 py-1.5 transition-colors ${
-                    activeSection === item.id ? "text-[var(--foreground)]" : "hover:text-[var(--foreground)]"
-                  }`}
-                >
-                  {activeSection === item.id && (
-                    <motion.div
-                      layoutId="active-nav-pill"
-                      className="absolute inset-0 rounded-lg border border-[var(--border)] bg-[color:var(--surface-elevated)]"
-                      transition={{ type: "spring", bounce: 0.18, duration: 0.6 }}
-                    />
-                  )}
-                  <span className="relative z-10">{item.label}</span>
-                </a>
-              ))}
-              <button type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className={btnOutline}>
-                {theme === "dark" ? "Light mode" : "Dark mode"}
-              </button>
-            </nav>
+            <a href="#contact" className="btn btn--primary">
+              Contact
+            </a>
           </div>
         </header>
 
-        <main className="space-y-12 sm:space-y-16">
-          <section className="flex flex-col items-center gap-5 text-center sm:items-start sm:gap-6 sm:text-left lg:flex-row lg:items-center">
-            <motion.aside
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              transition={{ duration: 0.55, ease: "easeOut", delay: 0.08 }}
-              className="w-[148px] shrink-0 rounded-xl border border-[var(--border)] bg-[color:var(--surface)] p-2 shadow-[var(--shadow)] sm:w-[180px] lg:w-[216px]"
-            >
-              <div className="overflow-hidden rounded-lg border border-[var(--border)] bg-[color:var(--surface-elevated)]">
-                <div className="relative aspect-square">
-                  <Image
-                    src={profile.imageSrc}
-                    alt={`${profile.name} portrait`}
-                    fill
-                    priority
-                    sizes="(max-width: 640px) 148px, 216px"
-                    className="object-cover object-center"
-                  />
-                </div>
+        <main id="top">
+          <section className="index-intro" aria-label="Introduction">
+            <div>
+              <h1 className="index-intro__name">{profile.name}</h1>
+              <p className="index-intro__eyebrow">{profile.location}</p>
+              <p className="index-intro__lede">
+                {profile.role}. Skills, education, credentials, and selected projects below. Open any
+                row for the full write-up.
+              </p>
+              <div className="index-intro__meta">
+                {socialLinks.map((link) => (
+                  <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer">
+                    {link.label}
+                  </a>
+                ))}
               </div>
-            </motion.aside>
-
-            <motion.div
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="w-full space-y-4 sm:space-y-5 lg:max-w-2xl"
-            >
-              <div>
-                <h2 className="text-[2rem] font-semibold tracking-tight text-balance sm:text-[2.75rem] lg:text-[3.375rem]">
-                  {profile.name}
-                </h2>
-                <p className="mt-1 text-base font-medium text-[var(--accent-secondary)] sm:pl-1 sm:text-xl">
-                  {profile.role}
-                </p>
-              </div>
-              <div className="flex flex-wrap justify-center gap-2.5 sm:justify-start sm:gap-3">
-                <a
-                  href="#projects"
-                  className="rounded-lg bg-[var(--accent-strong)] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 sm:px-5 sm:py-3"
-                >
-                  View projects
-                </a>
-                <a
-                  href="#contact"
-                  className={`${btnOutline} px-4 py-2.5 font-medium text-[var(--foreground)] sm:px-5 sm:py-3`}
-                >
-                  Contact
-                </a>
-              </div>
-            </motion.div>
+            </div>
+            <figure className="index-intro__portrait">
+              <Image
+                src={profile.imageSrc}
+                alt={`${profile.name} portrait`}
+                fill
+                priority
+                sizes="220px"
+                className="object-cover object-center"
+              />
+            </figure>
           </section>
 
-          <Section id="skills" title="Skills">
-            <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
-              {skillGroups.map((group, i) => (
-                <Card key={group.title} delay={i * 0.06}>
-                  <h3 className="text-lg font-semibold sm:text-xl">{group.title}</h3>
-                  <p className={`mt-2 ${bodyText}`}>{group.description}</p>
-                  <div className="mt-4 flex flex-wrap gap-1.5 border-t border-[var(--border)] pt-4 sm:mt-5 sm:gap-2 sm:pt-2">
-                    {group.items.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-sm border border-[color:color-mix(in_srgb,var(--accent)_28%,var(--border))] bg-[color:var(--surface-elevated)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--foreground)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-                      >
-                        {item}
-                      </span>
-                    ))}
+          <nav className="index-toc" aria-label="Page index">
+            {navItems.map((item, index) => (
+              <a key={item.id} href={`#${item.id}`} className="index-toc__row">
+                <span className="index-toc__num">{String(index + 1).padStart(2, "0")}</span>
+                <span className="index-toc__label">{item.label}</span>
+                <span className="index-toc__hint">{tocHints[item.id] ?? ""}</span>
+              </a>
+            ))}
+          </nav>
+
+          <section id="skills" className="section-block">
+            <header className="section-head">
+              <span className="section-head__num">01</span>
+              <h2>Skills</h2>
+              <p>Modeling, analytics, and shipping interfaces.</p>
+            </header>
+            <div className="index-stack">
+              {skillGroups.map((group, index) => (
+                <div key={group.title} className="index-row index-row--static">
+                  <span className="index-row__num">{String(index + 1).padStart(2, "0")}</span>
+                  <div>
+                    <h3 className="index-row__title">{group.title}</h3>
+                    <p className="index-row__summary">{group.description}</p>
+                    <ul className="skill-items">
+                      {group.items.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
-          </Section>
+          </section>
 
-          <Section id="education" title="Education">
-            <div className="space-y-3">
-              {timelineItems
-                .filter((item) => item.type === "education")
-                .map((item) => (
-                  <TimelineRow
-                    key={item.slug}
-                    item={item}
-                    theme={theme}
-                    onOpen={() => openItem("timeline", item.slug)}
-                  />
-                ))}
-            </div>
-          </Section>
-
-          <Section id="certifications" title="Certifications">
-            <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
-              {certificationItems.map((item) => (
-                <CertificationCard key={item.slug} item={item} theme={theme} />
+          <section id="education" className="section-block">
+            <header className="section-head">
+              <span className="section-head__num">02</span>
+              <h2>Education</h2>
+            </header>
+            <div className="index-stack">
+              {education.map((item, index) => (
+                <TimelineRow
+                  key={item.slug}
+                  item={item}
+                  theme={theme}
+                  index={index}
+                  onOpen={() => openItem("timeline", item.slug)}
+                />
               ))}
             </div>
-          </Section>
+          </section>
 
-          <Section id="projects" title="Projects">
-            <div className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {projectItems.map((project) => (
-                <motion.button
+          <section id="certifications" className="section-block">
+            <header className="section-head">
+              <span className="section-head__num">03</span>
+              <h2>Certifications</h2>
+            </header>
+            <div className="index-stack">
+              {certificationItems.map((item, index) => (
+                <CertificationRow key={item.slug} item={item} index={index} />
+              ))}
+            </div>
+          </section>
+
+          <section id="projects" className="section-block">
+            <header className="section-head">
+              <span className="section-head__num">04</span>
+              <h2>Projects</h2>
+              <p>Open any row for write-up and files.</p>
+            </header>
+            <div className="index-stack">
+              {projectItems.map((project, index) => (
+                <button
                   key={project.slug}
                   type="button"
                   onClick={() => openItem("project", project.slug)}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.995 }}
-                  className="group flex h-full flex-col rounded-lg border border-[var(--border)] bg-[color:var(--surface)] p-4 text-left shadow-[var(--shadow)] transition hover:bg-[color:var(--surface-elevated)] sm:p-5"
+                  className="index-row index-row--project"
                 >
-                  <div className="relative mb-4 w-full overflow-hidden rounded-md border border-[var(--border)] bg-[color:var(--surface-elevated)] sm:mb-5">
-                    <div className="relative aspect-[17/11] w-full">
-                      <Image
-                        src={project.imageSrc}
-                        alt={project.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                        className="object-cover object-center transition duration-300 group-hover:scale-[1.02]"
-                      />
-                    </div>
+                  <span className="index-row__num">{String(index + 1).padStart(2, "0")}</span>
+                  <figure className="index-row__thumb" aria-hidden="true">
+                    <ProjectMark slug={project.slug} className="index-row__mark" />
+                  </figure>
+                  <div className="min-w-0">
+                    <p className="index-row__meta">{project.category}</p>
+                    <h3 className="index-row__title">{project.title}</h3>
+                    <p className="index-row__summary">{project.summary}</p>
+                    <ul className="index-row__tags">
+                      {project.tags.slice(0, 4).map((tag) => (
+                        <li key={tag}>{tag}</li>
+                      ))}
+                    </ul>
+                    <span className="index-row__open">Open project →</span>
                   </div>
-                  <p className={metaLabel}>{project.category}</p>
-                  <h3 className="mt-2 text-lg font-semibold sm:mt-3 sm:text-xl">{project.title}</h3>
-                  <p className={`mt-2 sm:mt-3 ${bodyText}`}>{project.summary}</p>
-                  <div className="mt-auto flex flex-wrap gap-1.5 pt-3 sm:gap-2 sm:pt-4">
-                    {project.tags.map((tag) => (
-                      <span key={tag} className={tagPill}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </motion.button>
+                </button>
               ))}
             </div>
-          </Section>
+          </section>
 
-          <Section id="work" title="Work">
-            <div className="space-y-3">
-              {timelineItems
-                .filter((item) => item.type === "work")
-                .map((item) => (
-                  <TimelineRow
-                    key={item.slug}
-                    item={item}
-                    theme={theme}
-                    onOpen={() => openItem("timeline", item.slug)}
-                  />
+          <section id="work" className="section-block">
+            <header className="section-head">
+              <span className="section-head__num">05</span>
+              <h2>Work</h2>
+            </header>
+            <div className="index-stack">
+              {work.map((item, index) => (
+                <TimelineRow
+                  key={item.slug}
+                  item={item}
+                  theme={theme}
+                  index={index}
+                  onOpen={() => openItem("timeline", item.slug)}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section id="contact" className="section-block">
+            <header className="section-head">
+              <span className="section-head__num">06</span>
+              <h2>Contact</h2>
+            </header>
+            <div className="contact-block">
+              <p>
+                Open to opportunities, collaborations, or conversations about data, AI, and economics.
+              </p>
+              <div className="contact-links">
+                {socialLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn--primary"
+                  >
+                    {link.label}
+                  </a>
                 ))}
+              </div>
+              <p className="contact-place">
+                Location
+                <strong>{profile.location}</strong>
+                From Campinas, Brazil. Living in Calgary, Alberta.
+              </p>
             </div>
-          </Section>
-
-          <Section id="contact" title="Contact">
-            <div className="grid gap-3 sm:gap-4 md:grid-cols-[1.2fr_0.8fr]">
-              <Card>
-                <h3 className="text-xl font-semibold sm:text-2xl">Get in touch</h3>
-                <p className={`mt-3 ${bodyText}`}>
-                  I&apos;m open to new opportunities, collaborations, or just connecting about data, AI, and
-                  economics. Feel free to reach out anytime.
-                </p>
-                <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:flex-wrap sm:gap-3">
-                  {socialLinks.map((link) => (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-md border border-[var(--border)] px-4 py-2.5 text-center text-sm transition hover:bg-[color:var(--surface-elevated)] sm:py-2"
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                </div>
-              </Card>
-              <Card>
-                <p className="text-sm uppercase tracking-[0.22em] text-[var(--accent)]">Location</p>
-                <p className="mt-3 text-lg font-medium">{profile.location}</p>
-                <p className={`mt-3 ${bodyText}`}>From Campinas, Brazil. Living in Calgary, Alberta.</p>
-              </Card>
-            </div>
-          </Section>
+          </section>
         </main>
+
+        <footer className="foot-stmt">
+          <p className="foot-stmt__line">Build something they can trust the numbers on.</p>
+          <div className="foot-stmt__meta">
+            <span className="wordmark">{profile.name}</span>
+            <div className="foot-stmt__links">
+              <a href="#projects">Projects</a>
+              <a href="#contact">Contact</a>
+              <span>© {year}</span>
+            </div>
+          </div>
+        </footer>
       </div>
 
       <AnimatePresence>
         {currentItem ? (
           <motion.div
-            ref={modalOverlayRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`${overlayClass} z-50`}
+            transition={{ duration: reduceMotion ? 0.12 : 0.18 }}
+            className="modal-overlay"
             onClick={closeModal}
           >
             <motion.div
-              initial={{ y: 20, opacity: 0, scale: 0.98 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 16, opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.18 }}
+              {...modalMotion}
+              transition={{ duration: reduceMotion ? 0.12 : 0.18, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className={modalPanelClass}
+              className="modal-panel"
+              role="dialog"
+              aria-modal="true"
+              aria-label={currentItem.title}
             >
-              <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--border)] px-4 py-3 sm:px-6 sm:py-4">
-                <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-5">
-                  {currentTimeline?.logo && (
-                    <div className="relative hidden h-16 w-16 shrink-0 sm:block sm:h-20 sm:w-20">
+              <div className="modal-head">
+                <div className="flex min-w-0 flex-1 items-start gap-4">
+                  {currentTimeline?.logo ? (
+                    <div className="relative hidden h-16 w-16 shrink-0 sm:block">
                       <Image
                         src={theme === "dark" ? currentTimeline.logo.dark : currentTimeline.logo.light}
                         alt={currentTimeline.institution ?? ""}
                         fill
-                        sizes="80px"
+                        sizes="64px"
                         className="object-contain"
                       />
                     </div>
-                  )}
+                  ) : null}
+                  {currentProject ? (
+                    <div className="index-row__thumb index-row__thumb--modal" aria-hidden="true">
+                      <ProjectMark slug={currentProject.slug} className="index-row__mark" />
+                    </div>
+                  ) : null}
                   <div className="min-w-0">
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-secondary)] sm:text-xs sm:tracking-[0.24em]">
+                    <p className="cert-row__issued">
                       {currentProject?.category ?? currentTimeline?.location}
                     </p>
-                    <h3 className="mt-1 text-lg font-semibold leading-snug sm:mt-2 sm:text-2xl">
+                    <h3 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
                       {currentItem.title}
-                      {currentTimeline?.accolade && (
+                      {currentTimeline?.accolade ? (
                         <AccoladeBadge
                           label={currentTimeline.accolade}
                           variant={currentTimeline.accoladeVariant}
                         />
-                      )}
+                      ) : null}
                     </h3>
-                    {currentTimeline?.institution && (
-                      <p className="mt-1 text-sm font-medium text-[var(--accent)]">{currentTimeline.institution}</p>
-                    )}
-                    {currentTimeline && <p className={`mt-2 hidden sm:block ${bodyText}`}>{currentItem.summary}</p>}
+                    {currentTimeline?.institution ? (
+                      <p className="timeline-row__meta">{currentTimeline.institution}</p>
+                    ) : null}
+                    {currentTimeline ? (
+                      <p className="timeline-row__summary hidden sm:block">{currentItem.summary}</p>
+                    ) : null}
                   </div>
                 </div>
-                <button type="button" onClick={closeModal} className={`${btnOutline} shrink-0`}>
+                <button type="button" onClick={closeModal} className="btn btn--ghost shrink-0">
                   Close
                 </button>
               </div>
 
-              <div
-                ref={modalScrollRef}
-                className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-6 ${bodyText}`}
-              >
-                {currentTimeline && <p className={`mb-4 sm:hidden ${bodyText}`}>{currentItem.summary}</p>}
-                <div className="flex flex-wrap gap-1.5 sm:mb-2 sm:gap-2">
+              <div ref={modalScrollRef} className="modal-body">
+                {currentTimeline ? (
+                  <p className="mb-4 sm:hidden">{currentItem.summary}</p>
+                ) : null}
+                <ul className="timeline-row__tags mb-4">
                   {currentItem.tags.map((tag) => (
-                    <span key={tag} className={tagPill}>
-                      {tag}
-                    </span>
+                    <li key={tag}>{tag}</li>
                   ))}
-                </div>
-                <div className="mt-4 border-t border-[var(--border)] pt-4 sm:mt-6 sm:pt-6">
+                </ul>
+                <div className="border-t border-[var(--color-rule)] pt-5">
                   <DetailBlocks details={currentItem.details} modalType={activeModal?.type ?? null} />
                 </div>
                 {currentProject?.files?.length ? (
-                  <div className="border-t border-[var(--border)] pt-5 opacity-90 sm:pt-6">
-                    <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--accent-secondary)]">
-                      Project files
-                    </p>
+                  <div className="border-t border-[var(--color-rule)] pt-5">
+                    <p className="detail-label mb-3">Project files</p>
                     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       {currentProject.files.map((file) => (
                         <button
                           key={file.href}
                           type="button"
-                          onClick={() => openFile(file.href, currentItem.title)}
-                          className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2.5 text-sm font-medium sm:justify-start sm:py-2"
+                          onClick={() =>
+                            openFile(file.href, file.label, isWebDemoFile(file))
+                          }
+                          className="btn btn--ghost"
                         >
                           <span
                             className="icon-minimalist"
@@ -852,56 +789,76 @@ export function PortfolioShell() {
       <AnimatePresence>
         {activeFileViewer ? (
           <motion.div
-            ref={fileViewerOverlayRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`${overlayClass} z-[60] bg-black/70`}
+            transition={{ duration: reduceMotion ? 0.12 : 0.15 }}
+            className="modal-overlay modal-overlay--viewer"
+            style={{ zIndex: 60 }}
             onClick={() => setActiveFileViewer(null)}
           >
             <motion.div
-              initial={{ y: 20, opacity: 0, scale: 0.98 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 16, opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.15 }}
+              {...modalMotion}
+              transition={{ duration: reduceMotion ? 0.12 : 0.15, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className={`${modalPanelClass} ${
-                isImageHref(activeFileViewer.href) ? "max-h-[min(88dvh,900px)]" : "h-[min(88dvh,900px)]"
+              className={`modal-panel ${
+                isImageHref(activeFileViewer.href)
+                  ? "modal-panel--image"
+                  : activeFileViewer.wide
+                    ? "modal-panel--file-wide"
+                    : "modal-panel--file"
               }`}
+              data-viewer={
+                isImageHref(activeFileViewer.href)
+                  ? "image"
+                  : activeFileViewer.wide
+                    ? "wide"
+                    : "document"
+              }
+              role="dialog"
+              aria-modal="true"
+              aria-label={activeFileViewer.title}
             >
-              <div className="flex shrink-0 flex-col gap-3 border-b border-[var(--border)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              <div className="modal-head flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[var(--accent-secondary)]">Original file</p>
-                  <h3 className="mt-1 truncate text-base font-semibold sm:text-lg">{activeFileViewer.title}</h3>
+                  <p className="cert-row__issued">Original file</p>
+                  <h3 className="mt-1 truncate text-lg font-semibold">{activeFileViewer.title}</h3>
                 </div>
                 <div className="flex gap-2">
                   <a
                     href={activeFileViewer.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`${btnOutline} flex-1 text-center sm:flex-none`}
+                    className="btn btn--ghost flex-1 sm:flex-none"
                   >
                     Open tab
                   </a>
-                  <button type="button" onClick={() => setActiveFileViewer(null)} className={`${btnOutline} flex-1 sm:flex-none`}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFileViewer(null)}
+                    className="btn btn--ghost flex-1 sm:flex-none"
+                  >
                     Close
                   </button>
                 </div>
               </div>
               {isImageHref(activeFileViewer.href) ? (
-                <div className="flex flex-1 items-center justify-center overflow-auto overscroll-contain bg-black/5 p-4">
-                  <img src={activeFileViewer.href} alt={activeFileViewer.title} className="max-h-full max-w-full object-contain" />
+                <div className="flex flex-1 items-center justify-center overflow-auto overscroll-contain bg-[var(--color-paper-2)] p-4">
+                  <img
+                    src={activeFileViewer.href}
+                    alt={activeFileViewer.title}
+                    className="max-h-full max-w-full object-contain"
+                  />
                 </div>
               ) : (
                 <iframe
-                  ref={fileIframeRef}
                   title={activeFileViewer.title}
                   src={
                     activeFileViewer.href.toLowerCase().endsWith(".pdf")
                       ? `${activeFileViewer.href}#view=FitH`
                       : activeFileViewer.href
                   }
-                  className="min-h-0 flex-1 border-0 bg-white"
+                  className="min-h-0 flex-1 border-0 bg-[var(--color-paper)]"
                 />
               )}
             </motion.div>
@@ -909,40 +866,5 @@ export function PortfolioShell() {
         ) : null}
       </AnimatePresence>
     </div>
-  );
-}
-
-function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
-  return (
-    <motion.section
-      id={id}
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="scroll-mt-[5.5rem] sm:scroll-mt-28"
-    >
-      <div className="mb-4 sm:mb-6">
-        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h2>
-        <div className="mt-2 h-0.5 w-10 rounded-full bg-[var(--accent)] sm:mt-3" />
-      </div>
-      {children}
-    </motion.section>
-  );
-}
-
-function Card({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.16 }}
-      transition={{ duration: 0.4, ease: "easeOut", delay }}
-      className="rounded-lg border border-[var(--border)] bg-[color:var(--surface)] p-4 shadow-[var(--shadow)] sm:p-5"
-    >
-      {children}
-    </motion.div>
   );
 }
