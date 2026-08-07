@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ticket Labeller · System Diagram</title>
+  <script>
+    (function () {
+      var KEY = "portfolio-theme";
+      function readTheme() {
+        try {
+          var stored = localStorage.getItem(KEY);
+          return stored === "light" || stored === "dark" ? stored : "dark";
+        } catch (e) {
+          return "dark";
+        }
+      }
+      function apply(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+      }
+      apply(readTheme());
+      window.addEventListener("storage", function (e) {
+        if (e.key === KEY) apply(readTheme());
+      });
+      window.addEventListener("message", function (e) {
+        if (!e.data || e.data.type !== "portfolio-theme") return;
+        if (e.data.theme === "light" || e.data.theme === "dark") apply(e.data.theme);
+      });
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root, [data-theme="light"] {
+      --paper: oklch(98.5% 0.004 250);
+      --paper-2: oklch(96% 0.006 252);
+      --ink: oklch(24% 0.02 258);
+      --muted: oklch(52% 0.014 256);
+      --rule: oklch(88% 0.01 250);
+      --accent: oklch(58% 0.20 256);
+      --accent-soft: oklch(94% 0.03 256);
+      --team: oklch(52% 0.02 256);
+      --team-soft: oklch(95% 0.01 256);
+      --side: oklch(55% 0.08 70);
+      --side-soft: oklch(96% 0.03 70);
+      color-scheme: light;
+    }
+    [data-theme="dark"] {
+      --paper: oklch(14% 0.012 256);
+      --paper-2: oklch(18% 0.014 256);
+      --ink: oklch(94% 0.008 256);
+      --muted: oklch(68% 0.012 256);
+      --rule: oklch(30% 0.014 256);
+      --accent: oklch(70% 0.16 256);
+      --accent-soft: oklch(24% 0.04 256);
+      --team: oklch(72% 0.02 256);
+      --team-soft: oklch(22% 0.02 256);
+      --side: oklch(78% 0.1 70);
+      --side-soft: oklch(24% 0.04 70);
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      background:
+        radial-gradient(1100px 480px at 8% -12%, color-mix(in oklch, var(--accent) 12%, transparent), transparent 60%),
+        var(--paper);
+      color: var(--ink);
+      padding: 1.25rem 1rem 2.5rem;
+    }
+    .shell { width: min(100%, 68rem); margin-inline: auto; }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.1rem;
+    }
+    h1 {
+      margin: 0;
+      font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+      font-size: clamp(1.35rem, 1rem + 1.2vw, 1.75rem);
+      letter-spacing: -0.02em;
+    }
+    .sub { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.9rem; max-width: 56ch; }
+    .theme-switch {
+      display: inline-flex;
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--paper-2);
+    }
+    .theme-switch button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.3rem 0.55rem;
+      cursor: pointer;
+    }
+    .theme-switch button + button { border-left: 1px solid var(--rule); }
+    .theme-switch button[aria-pressed="true"] {
+      background: var(--accent-soft);
+      color: var(--ink);
+    }
+    .board {
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      background: color-mix(in oklch, var(--paper-2) 80%, transparent);
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    svg { display: block; width: 100%; min-width: 980px; height: auto; }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .dot {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .note {
+      margin-top: 0.85rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      max-width: 72ch;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <h1>System diagram</h1>
+        <p class="sub">
+          Intake feeds a GitHub issue. From the Action, labelling and clustering run in parallel.
+          Highlighted boxes are what I built.
+        </p>
+      </div>
+    </header>
+
+    <div class="board" aria-label="Architecture diagram">
+      <!--
+        Grid (16px rhythm):
+        Cols: intake 24 | issue 196 | action 368 | lanes 540
+        Upper lane y=40..168 | Lower lane y=192..320
+        Hub (issue/action) centered on y=148 between both lanes
+      -->
+      <svg viewBox="0 0 1160 348" role="img" aria-labelledby="diagTitle diagDesc">
+        <title id="diagTitle">Ticket Labeller flow</title>
+        <desc id="diagDesc">
+          Chatbot and auto PRD feed a GitHub issue. A GitHub Action then runs two parallel paths:
+          taxonomy labelling through FastAPI, Qwen, and post-processing; and theme clustering with
+          a cluster report export that also applies cluster names as GitHub labels.
+        </desc>
+
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+          </marker>
+          <style>
+            .mine {
+              fill: var(--accent-soft);
+              stroke: var(--accent);
+              stroke-width: 1.75;
+            }
+            .team {
+              fill: var(--team-soft);
+              stroke: var(--rule);
+              stroke-width: 1.5;
+            }
+            .side {
+              fill: var(--side-soft);
+              stroke: var(--side);
+              stroke-width: 1.75;
+            }
+            .result {
+              fill: var(--team-soft);
+              stroke: var(--rule);
+              stroke-width: 1.25;
+            }
+            .lbl {
+              fill: var(--ink);
+              font-family: "Space Grotesk", Inter, sans-serif;
+              font-size: 13px;
+              font-weight: 600;
+            }
+            .sublbl {
+              fill: var(--muted);
+              font-family: Inter, sans-serif;
+              font-size: 11px;
+            }
+            .tag {
+              fill: var(--accent);
+              font-family: "JetBrains Mono", monospace;
+              font-size: 9.5px;
+              font-weight: 500;
+            }
+            .tag-team {
+              fill: var(--muted);
+              font-family: "JetBrains Mono", monospace;
+              font-size: 9.5px;
+              font-weight: 500;
+            }
+            .tag-side {
+              fill: var(--side);
+              font-family: "JetBrains Mono", monospace;
+              font-size: 9.5px;
+              font-weight: 500;
+            }
+            .flow-line {
+              stroke: var(--team);
+              stroke-width: 1.5;
+              fill: none;
+            }
+            .flow {
+              stroke: var(--accent);
+              stroke-width: 1.6;
+              fill: none;
+              marker-end: url(#arrow);
+              color: var(--accent);
+            }
+            .flow-team {
+              stroke: var(--team);
+              stroke-width: 1.5;
+              fill: none;
+              marker-end: url(#arrow);
+              color: var(--team);
+            }
+            .flow-side {
+              stroke: var(--side);
+              stroke-width: 1.5;
+              fill: none;
+              marker-end: url(#arrow);
+              color: var(--side);
+              stroke-dasharray: 4 3.5;
+            }
+            .section {
+              fill: var(--muted);
+              font-family: Inter, sans-serif;
+              font-size: 10.5px;
+              font-weight: 600;
+              letter-spacing: 0.05em;
+              text-transform: uppercase;
+            }
+            .lane-band {
+              fill: color-mix(in oklch, var(--paper) 55%, transparent);
+              stroke: none;
+            }
+            .card {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              box-sizing: border-box;
+              height: 100%;
+              padding: 0 12px;
+              gap: 3px;
+              font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+              color: var(--ink);
+              line-height: 1.2;
+            }
+            .card--result {
+              justify-content: center;
+              padding: 0 14px;
+              gap: 0;
+            }
+            .card .tag {
+              font-family: "JetBrains Mono", ui-monospace, monospace;
+              font-size: 9.5px;
+              font-weight: 500;
+              letter-spacing: 0.06em;
+              text-transform: uppercase;
+              color: var(--muted);
+              line-height: 1;
+            }
+            .card .tag.mine { color: var(--accent); }
+            .card .tag.side { color: var(--side); }
+            .card .title {
+              font-family: "Space Grotesk", Inter, sans-serif;
+              font-size: 13px;
+              font-weight: 600;
+              letter-spacing: -0.01em;
+              color: var(--ink);
+              line-height: 1.15;
+            }
+            .card .sub {
+              font-size: 11px;
+              font-weight: 400;
+              color: var(--muted);
+              line-height: 1.25;
+            }
+            .card--result .sub {
+              font-size: 11px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          </style>
+        </defs>
+
+        <text class="section" x="24" y="22">Intake</text>
+        <text class="section" x="212" y="22">GitHub</text>
+        <text class="section" x="540" y="22">Labelling · mine</text>
+        <text class="section" x="540" y="186">Clustering · mine · client ask</text>
+
+        <!-- Lane bands: same width, same left edge, equal height -->
+        <rect class="lane-band" x="532" y="32" width="608" height="136" rx="12" />
+        <rect class="lane-band" x="532" y="196" width="608" height="136" rx="12" />
+
+        <!-- Intake -->
+        <rect class="team" x="24" y="88" width="156" height="72" rx="10" />
+        <foreignObject x="24" y="88" width="156" height="72">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card">
+            <span class="tag">Team</span>
+            <span class="title">Chatbot</span>
+            <span class="sub">Helps draft the issue</span>
+          </div>
+        </foreignObject>
+
+        <rect class="team" x="24" y="172" width="156" height="72" rx="10" />
+        <foreignObject x="24" y="172" width="156" height="72">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card">
+            <span class="tag">Team</span>
+            <span class="title">Auto PRD</span>
+            <span class="sub">Requirements doc</span>
+          </div>
+        </foreignObject>
+
+        <!-- Hub -->
+        <rect class="team" x="212" y="124" width="140" height="84" rx="10" />
+        <foreignObject x="212" y="124" width="140" height="84">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card">
+            <span class="tag">GitHub</span>
+            <span class="title">New issue</span>
+            <span class="sub">Title + body</span>
+          </div>
+        </foreignObject>
+
+        <rect class="team" x="372" y="124" width="148" height="84" rx="10" />
+        <foreignObject x="372" y="124" width="148" height="84">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card">
+            <span class="tag">Team</span>
+            <span class="title">GitHub Action</span>
+            <span class="sub">Auto / schedule / manual</span>
+          </div>
+        </foreignObject>
+
+        <!-- Upper lane -->
+        <rect class="mine" x="552" y="48" width="176" height="68" rx="10" />
+        <foreignObject x="552" y="48" width="176" height="68">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card">
+            <span class="tag mine">Mine</span>
+            <span class="title">FastAPI labeller</span>
+            <span class="sub">JSON · GitHub sync</span>
+          </div>
+        </foreignObject>
+
+        <rect class="mine" x="748" y="48" width="176" height="68" rx="10" />
+        <foreignObject x="748" y="48" width="176" height="68">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card">
+            <span class="tag mine">Mine</span>
+            <span class="title">Ollama / Qwen</span>
+            <span class="sub">Reasoning model</span>
+          </div>
+        </foreignObject>
+
+        <rect class="mine" x="944" y="48" width="176" height="68" rx="10" />
+        <foreignObject x="944" y="48" width="176" height="68">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card">
+            <span class="tag mine">Mine</span>
+            <span class="title">Post-process</span>
+            <span class="sub">Rules + review flag</span>
+          </div>
+        </foreignObject>
+
+        <rect class="result" x="552" y="132" width="568" height="24" rx="8" />
+        <foreignObject x="552" y="132" width="568" height="24">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card card--result">
+            <span class="sub">Taxonomy labels written back onto the GitHub issue</span>
+          </div>
+        </foreignObject>
+
+        <!-- Lower lane -->
+        <rect class="side" x="552" y="212" width="274" height="68" rx="10" />
+        <foreignObject x="552" y="212" width="274" height="68">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card">
+            <span class="tag side">Mine · client ask</span>
+            <span class="title">Theme clustering</span>
+            <span class="sub">Embed → UMAP → HDBSCAN</span>
+          </div>
+        </foreignObject>
+
+        <rect class="side" x="846" y="212" width="274" height="68" rx="10" />
+        <foreignObject x="846" y="212" width="274" height="68">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card">
+            <span class="tag side">Mine</span>
+            <span class="title">Cluster report export</span>
+            <span class="sub">Name, description, tickets</span>
+          </div>
+        </foreignObject>
+
+        <rect class="result" x="552" y="296" width="568" height="24" rx="8" />
+        <foreignObject x="552" y="296" width="568" height="24">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="card card--result">
+            <span class="sub">Cluster name applied as a GitHub label on each ticket in the cluster</span>
+          </div>
+        </foreignObject>
+
+        <!-- Intake merge: lines only, single arrow into New issue -->
+        <path class="flow-line" d="M180 124 H192" />
+        <path class="flow-line" d="M180 208 H192" />
+        <path class="flow-line" d="M192 124 V208" />
+        <path class="flow-team" d="M192 166 H212" />
+
+        <!-- Issue → Action -->
+        <path class="flow-team" d="M352 166 H372" />
+
+        <!-- Action fork: orthogonal to each lane centerline -->
+        <path class="flow" d="M520 152 H532 V82 H552" />
+        <path class="flow-side" d="M520 180 H532 V246 H552" />
+
+        <!-- Upper chain -->
+        <path class="flow" d="M728 82 H748" />
+        <path class="flow" d="M924 82 H944" />
+        <path class="flow" d="M1032 116 V132" />
+
+        <!-- Lower chain -->
+        <path class="flow-side" d="M826 246 H846" />
+        <path class="flow-side" d="M983 280 V296" />
+      </svg>
+    </div>
+
+    <div class="legend">
+      <span><i class="dot" style="background: var(--accent)"></i> Labelling path</span>
+      <span><i class="dot" style="background: var(--side)"></i> Clustering path</span>
+      <span><i class="dot" style="background: var(--team)"></i> Teammate / GitHub</span>
+    </div>
+    <p class="note">
+      Shared front: chatbot and auto PRD create a GitHub issue, then an Action fans out.
+      Upper lane labels with FastAPI, Qwen, and post-processing. Lower lane clusters themes,
+      exports the report, and applies each cluster name as a GitHub label on member tickets.
+    </p>
+  </div>
+
+</body>
+</html>

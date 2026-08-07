@@ -81,13 +81,13 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     title: "Data Analytics & Strategy",
-    description: "SQL, statistics, and BI tools for turning raw tables into decisions.",
+    description: "SQL, statistics, and BI tools for analysis and reporting.",
     items: ["SQL", "Power BI", "Excel", "Statistics", "Predictive Analytics"],
   },
   {
     title: "Software & Cloud",
-    description: "Web apps and APIs with Flask, React, and Next.js.",
-    items: ["Flask", "React", "Next.js", "HTML/CSS", "Git", "Cloud Computing", "System Integration"],
+    description: "Web apps and APIs with Flask, FastAPI, React, and Next.js.",
+    items: ["Flask", "FastAPI", "React", "Next.js", "HTML/CSS", "Git", "Azure", "Cloud Computing", "System Integration"],
   },
 ];
 
@@ -265,7 +265,7 @@ export const timelineItems: TimelineItem[] = [
   {
     slug: "best-buy-advisor",
     type: "work",
-    period: "Nov 2025 – Dec 2025",
+    period: "Nov 2025 - Dec 2025",
     title: "Computing Solutions Advisor (Seasonal)",
     location: "Best Buy Canada",
     summary: "Holiday contract in Best Buy's computing department: consultative sales during Black Friday and Boxing Day rushes.",
@@ -279,7 +279,7 @@ export const timelineItems: TimelineItem[] = [
   {
     slug: "tech-tutor",
     type: "work",
-    period: "Jul 2024 – Mar 2025",
+    period: "Jul 2024 - Mar 2025",
     title: "Private Technology Coach/Tutor",
     location: "Self Employed",
     summary: "Private tutoring for older adults on phones, email, Windows, and everyday digital tasks.",
@@ -353,7 +353,7 @@ export const certificationItems: CertificationItem[] = [
   {
     slug: "enap-r-analysis",
     title: "Data Analysis in R",
-    issuer: "ENAP — National School of Public Administration",
+    issuer: "ENAP, National School of Public Administration",
     issued: "Oct 2023",
     logo: "/images/logos/certs/enap.png",
   },
@@ -368,7 +368,7 @@ export const certificationItems: CertificationItem[] = [
   {
     slug: "extecamp-fundamental-analysis",
     title: "Fundamental Analysis",
-    issuer: "Extecamp — UNICAMP",
+    issuer: "Extecamp, UNICAMP",
     issued: "Nov 2022",
     logo: "/images/logos/certs/extecamp.png",
   },
@@ -389,6 +389,25 @@ export const certificationItems: CertificationItem[] = [
 ];
 
 export const projectItems: ProjectItem[] = [
+  {
+    slug: "ticket-labeller",
+    title: "EMR Ticket Labeller & Theme Clustering",
+    category: "SAIT Integrated AI Capstone · Ava Industries",
+    summary:
+      "FastAPI + Qwen labeller for Ava Industries GitHub issues, with theme clustering on Azure and a review flag when confidence is low.",
+    details: [
+      "Overview: PROJ-407 Integrated AI capstone with a team of four for Ava Industries in Calgary, the company behind Ava EMR. Our piece labels GitHub issues for their developers, not patient charts or clinical workflows. Build is done; presentation is next. I owned the FastAPI labeller API, theme clustering, and Azure/Qwen deploy. Teammates owned the ticket-filling chatbot, an auto PRD generator, and the GitHub Actions that call the API.",
+      "Problem: Developers carry a large GitHub issue backlog and a long label list. Hand-labelling is slow and drifts between people. Uncertain cases need a review flag. The team also wanted unsupervised themes the fixed taxonomy misses.",
+      "Approach: FastAPI asks Ollama/Qwen for structured JSON labels against a flat, prefix-coded taxonomy. Code then enforces cardinality and confidence, and appends Needs Human Review when the model is unsure. Local YAML and GitHub-synced taxonomies use the same pipeline. Admin SPA handles settings and live test labelling. A separate path embeds issues, runs UMAP and HDBSCAN, and names themes. Ran on Azure Container Apps with Qwen.",
+      "Results: 100+ labels in the taxonomy. 2,700+ issues labelled. Last pass put 17 of those 2,700+ into human review. Capstone build finished; presentation still pending.",
+      "Stack: Python, FastAPI, Ollama/Qwen, embeddings, UMAP, HDBSCAN, YAML taxonomy, Azure Container Apps, Docker, admin SPA.",
+    ],
+    tags: ["FastAPI", "LLMs", "Ollama/Qwen", "Azure", "UMAP", "HDBSCAN", "Human-in-the-loop", "Python"],
+    files: [
+      { label: "Admin UI Demo", href: "/projects/ticket_labeller/admin.html", icon: "window" },
+      { label: "System Diagram", href: "/projects/ticket_labeller/diagram.html", icon: "image" },
+    ],
+  },
   {
     slug: "cursor-hackathon",
     title: "Smart Inbox (Cursor Hackathon)",
@@ -417,7 +436,7 @@ export const projectItems: ProjectItem[] = [
       "Overview: Combined DATA-440 (predictive modeling) and ARTI-404 (web development) into one deliverable: a scikit-learn credit-risk classifier behind a Flask lending app with retail and business forms, SQLite application history, and a results screen with model confidence plus feature-level explanations.",
       "Problem: Credit decisions need a score and a reason. Staff also need a form they can submit without opening a notebook.",
       "Approach: EDA and hyperparameter tuning in Python before locking features. Flask app validates submissions, scores them, and writes prediction plus SHAP values to SQLite so the results page can list top contributors.",
-      "Results: End-to-end path from form submit to risk label, confidence, and stored history for later review. Modeling notebook and architecture diagram ship beside the HTML UI.",
+      "Results: Form submit returns a risk label, confidence, and stored history for later review. Modeling notebook and architecture diagram sit beside the HTML UI.",
       "Stack: Python, Scikit-Learn, Flask, HTML/CSS, SQLite, SHAP.",
     ],
     tags: ["Python", "Scikit-Learn", "Flask", "HTML/CSS", "Machine Learning", "Model Tuning"],
@@ -507,7 +526,7 @@ export const projectItems: ProjectItem[] = [
     summary:
       "Year-long UNICAMP thesis comparing macro schools on Brazil's COVID-era monetary financing, backed by BCB and Treasury data.",
     details: [
-      "Overview: CE-825 bachelor's monograph over two semesters at UNICAMP (Instituto de Economia). Compares Campinas School, UFRJ political economy, and orthodox readings on monetary financing of public spending during COVID, with BCB and National Treasury series for 2020–2021.",
+      "Overview: CE-825 bachelor's monograph over two semesters at UNICAMP (Instituto de Economia). Compares Campinas School, UFRJ political economy, and orthodox readings on monetary financing of public spending during COVID, with BCB and National Treasury series for 2020-2021.",
       "Problem: Brazil expanded federal spending under the Emergency Regime (War Budget). Debate turned on monetary financing vs debt issuance, inflation risk, and what the institutional rules allowed.",
       "Approach: Theory chapters set the three readings side by side. Descriptive work on monetary base, repo operations, and related fiscal flows from public BCB and Treasury data. Written and defended in Portuguese.",
       "Results: Monograph plus defense slides. Frames the period's financing choices against inflation risk, debt stock, and Emergency Regime limits, including how central-bank operations sat next to Treasury issuance.",
@@ -526,7 +545,7 @@ export const projectItems: ProjectItem[] = [
     summary:
       "Team project on ~795 Fortune 1000 firms: next-year revenue and rank checks with KNN, Random Forest, SVR, and MLP in Python.",
     details: [
-      "Overview: CE-874 intro data science team of four. Built a 2020–2024 Fortune panel (795 companies after alignment) to predict next-year revenue from prior filings (revenue, employees, market cap, profits, assets) and to check 2025 ranking outcomes across KNN, Random Forest, SVR, and MLP.",
+      "Overview: CE-874 intro data science team of four. Built a 2020-2024 Fortune panel (795 companies after alignment) to predict next-year revenue from prior filings (revenue, employees, market cap, profits, assets) and to check 2025 ranking outcomes across KNN, Random Forest, SVR, and MLP.",
       "Problem: Next-year revenue and rank jump around when you only have a few years of filings. Linear regression also breaks down when revenue, employees, market cap, profits, and assets move together.",
       "Approach: Train/test split on the multi-year panel. Fit KNN regression, Random Forest, SVR, and MLP in scikit-learn with grid search and cross-validation, then compared holdout fit against a linear baseline that multicollinearity breaks.",
       "Results: Report compares holdout fit across those models and shows how far the nonlinear ones get once multicollinearity wrecks plain OLS.",
@@ -537,7 +556,7 @@ export const projectItems: ProjectItem[] = [
   },
   {
     slug: "inss-covid-impact",
-    title: "COVID-19 Impact Analysis of Brazil’s Federal Revenues",
+    title: "COVID-19 Impact Analysis of Brazil's Federal Revenues",
     category: "CE-442 Final Project",
     summary:
       "Econometrics paper using SARIMA and intervention analysis to measure how COVID lockdowns cut Brazil's federal tax receipts compared to the pre-pandemic trend.",

@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ticket Labeller · Admin Demo</title>
+  <script>
+    (function () {
+      var KEY = "portfolio-theme";
+      function readTheme() {
+        try {
+          var stored = localStorage.getItem(KEY);
+          return stored === "light" || stored === "dark" ? stored : "dark";
+        } catch (e) {
+          return "dark";
+        }
+      }
+      function apply(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+      }
+      apply(readTheme());
+      window.addEventListener("storage", function (e) {
+        if (e.key === KEY) apply(readTheme());
+      });
+      window.addEventListener("message", function (e) {
+        if (!e.data || e.data.type !== "portfolio-theme") return;
+        if (e.data.theme === "light" || e.data.theme === "dark") apply(e.data.theme);
+      });
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root, [data-theme="light"] {
+      --color-paper: oklch(98.5% 0.004 250);
+      --color-paper-2: oklch(96% 0.006 252);
+      --color-paper-3: oklch(94% 0.008 254);
+      --color-ink: oklch(24% 0.02 258);
+      --color-ink-2: oklch(34% 0.018 257);
+      --color-muted: oklch(52% 0.014 256);
+      --color-rule: oklch(88% 0.01 250);
+      --color-rule-strong: oklch(78% 0.012 252);
+      --color-accent: oklch(58% 0.20 256);
+      --color-accent-ink: oklch(98% 0.01 256);
+      --color-focus: oklch(58% 0.20 256);
+      --color-ok: oklch(52% 0.12 155);
+      --color-ok-bg: oklch(95% 0.03 155);
+      --color-danger: oklch(55% 0.18 25);
+      --color-danger-bg: oklch(95% 0.03 25);
+      --color-chip: oklch(94% 0.02 256);
+      color-scheme: light;
+    }
+    [data-theme="dark"] {
+      --color-paper: oklch(14% 0.012 256);
+      --color-paper-2: oklch(18% 0.014 256);
+      --color-paper-3: oklch(22% 0.014 258);
+      --color-ink: oklch(94% 0.008 256);
+      --color-ink-2: oklch(82% 0.01 256);
+      --color-muted: oklch(68% 0.012 256);
+      --color-rule: oklch(30% 0.014 256);
+      --color-rule-strong: oklch(38% 0.016 256);
+      --color-accent: oklch(70% 0.16 256);
+      --color-accent-ink: oklch(18% 0.02 258);
+      --color-focus: oklch(70% 0.16 256);
+      --color-ok: oklch(72% 0.12 155);
+      --color-ok-bg: oklch(22% 0.04 155);
+      --color-danger: oklch(72% 0.14 25);
+      --color-danger-bg: oklch(24% 0.05 25);
+      --color-chip: oklch(24% 0.03 256);
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      background: var(--color-paper);
+      color: var(--color-ink);
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, .panel-title {
+      font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .masthead {
+      border-bottom: 1px solid var(--color-rule);
+      background: color-mix(in oklch, var(--color-paper) 92%, transparent);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .masthead-inner, .workbench {
+      width: min(100% - 2rem, 72rem);
+      margin-inline: auto;
+    }
+    .masthead-inner {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 1rem 0;
+    }
+    .brand-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .brand-mark { font-size: clamp(1.25rem, 1rem + 1vw, 1.5rem); line-height: 1.15; }
+    .brand-role {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+    }
+    .status { color: var(--color-muted); font-size: 0.875rem; }
+    .demo-banner {
+      margin-top: 0.35rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      background: var(--color-chip);
+      color: var(--color-ink-2);
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .masthead-actions, .theme-switch, .tabs, .row, .chip-row, .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .theme-switch {
+      border: 1px solid var(--color-rule);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--color-paper-2);
+      gap: 0;
+    }
+    .theme-switch button {
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--color-muted);
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      box-shadow: none;
+    }
+    .theme-switch button + button { border-left: 1px solid var(--color-rule); }
+    .theme-switch button[aria-pressed="true"] {
+      background: var(--color-paper-3);
+      color: var(--color-ink);
+    }
+    .workbench { padding: 1rem 0 2.5rem; }
+    .tabs {
+      gap: 0;
+      margin: 0 0 1rem;
+      border-bottom: 1px solid var(--color-rule);
+    }
+    .tabs button {
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      color: var(--color-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.75rem 1rem;
+      margin-bottom: -1px;
+    }
+    .tabs button.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+    }
+    .panel { display: none; flex-direction: column; gap: 1rem; }
+    .panel.active { display: flex; }
+    .panel-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--color-rule);
+    }
+    .panel-title { display: block; font-size: 1.125rem; line-height: 1.25; }
+    .panel-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-rule);
+    }
+    .row { align-items: end; }
+    label {
+      display: grid;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--color-ink-2);
+    }
+    label.grow { flex: 1; min-width: min(100%, 16rem); }
+    label.block { display: grid; width: 100%; }
+    input, select, textarea, button {
+      font: inherit;
+      border-radius: 6px;
+      border: 1px solid var(--color-rule-strong);
+      background: var(--color-paper-2);
+      color: var(--color-ink);
+      padding: 0.5rem 0.75rem;
+    }
+    input, select, textarea { font-size: 0.875rem; }
+    input.wide, select.wide { min-width: min(100%, 17.5rem); }
+    textarea { width: 100%; min-height: 6.25rem; resize: vertical; }
+    button {
+      cursor: pointer;
+      background: var(--color-accent);
+      border-color: transparent;
+      color: var(--color-accent-ink);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    button.secondary {
+      background: var(--color-paper-2);
+      border-color: var(--color-rule-strong);
+      color: var(--color-ink);
+      font-weight: 500;
+    }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .item-list { display: grid; gap: 0.5rem; }
+    .item {
+      display: grid;
+      gap: 0.35rem;
+      padding: 0.75rem;
+      border: 1px solid var(--color-rule);
+      border-radius: 8px;
+      background: var(--color-paper-2);
+    }
+    .item-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .item-name { font-weight: 600; font-size: 0.875rem; }
+    .item-meta {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.75rem;
+      color: var(--color-muted);
+    }
+    .item-desc { font-size: 0.875rem; color: var(--color-ink-2); }
+    .swatch {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--color-rule);
+      display: inline-block;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      background: var(--color-chip);
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+    .summary-swatch {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .result-box {
+      border: 1px solid var(--color-rule);
+      border-radius: 8px;
+      padding: 0.75rem;
+      background: var(--color-paper-2);
+    }
+    .result-box .label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--color-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
+    }
+    .result-box .value {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .result-box .value.normal {
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      font-weight: 400;
+      line-height: 1.45;
+    }
+    .message {
+      padding: 0.65rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      background: var(--color-ok-bg);
+      color: var(--color-ok);
+    }
+    .message.warn {
+      background: var(--color-danger-bg);
+      color: var(--color-danger);
+    }
+    .hidden { display: none !important; }
+    .preset-note {
+      font-size: 0.8125rem;
+      color: var(--color-muted);
+      max-width: 62ch;
+    }
+    .taxonomy-list-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--color-muted);
+      margin-bottom: 0.25rem;
+    }
+    .taxonomy-list-meta strong {
+      color: var(--color-ink);
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+    }
+    .compact-list-head {
+      display: grid;
+      grid-template-columns: 0.75rem 1.2fr 1fr 1.6fr;
+      gap: 0.5rem;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      border-bottom: 1px solid var(--color-rule);
+    }
+    .github-preview-row {
+      display: grid;
+      grid-template-columns: 0.75rem 1.2fr 1fr 1.6fr;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--color-rule);
+      font-size: 0.8125rem;
+    }
+    .github-preview-row:last-child { border-bottom: 0; }
+    .github-preview-row .summary-name { font-weight: 600; }
+    .github-preview-row .summary-id,
+    .github-preview-row .summary-desc {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 0.75rem;
+      color: var(--color-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .empty {
+      padding: 0.75rem;
+      color: var(--color-muted);
+      font-size: 0.875rem;
+    }
+    .banner {
+      padding: 0.65rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      background: var(--color-chip);
+      color: var(--color-ink-2);
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div>
+        <div class="brand-row">
+          <h1 class="brand-mark">Ticket Labeller</h1>
+          <span class="brand-role">Admin</span>
+        </div>
+        <div class="status">Static demo. Fake issue text only.</div>
+        <div class="demo-banner">No live API. Responses are prewritten.</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="workbench">
+    <div class="tabs" role="tablist">
+      <button type="button" class="active" data-tab="taxonomy">Local taxonomy</button>
+      <button type="button" data-tab="github">GitHub labels</button>
+      <button type="button" data-tab="model">Model</button>
+      <button type="button" data-tab="test">Test labelling</button>
+    </div>
+
+    <section class="panel active" id="panel-taxonomy">
+      <div class="panel-head">
+        <div>
+          <strong class="panel-title">Local taxonomy</strong>
+          <div class="status">Sample flat label list. Category comes from the display-name prefix.</div>
+        </div>
+        <button type="button" id="saveTaxonomyBtn">Save &amp; reload</button>
+      </div>
+      <div id="taxonomyGithubBanner" class="banner hidden">
+        Labelling is using GitHub labels. This tab always edits local YAML. Switch Source to Local on the Model tab to activate it.
+      </div>
+      <div class="toolbar">
+        <label>Search
+          <input id="taxonomySearch" type="search" placeholder="Filter by id, name, or description" />
+        </label>
+      </div>
+      <div id="taxonomyItems" class="item-list"></div>
+      <div id="taxonomyMessage" class="message hidden"></div>
+    </section>
+
+    <section class="panel" id="panel-github">
+      <div class="panel-head">
+        <div>
+          <strong class="panel-title">GitHub labels</strong>
+          <div class="status">Sync and preview the flat GitHub label cache. Mode (Local vs GitHub) is set on the Model tab.</div>
+        </div>
+      </div>
+      <div class="row">
+        <label class="grow">GitHub repo
+          <input id="githubLabelsRepo" class="wide" value="example-org/support-issues" readonly />
+        </label>
+        <button type="button" class="secondary" id="syncGithubBtn">Sync now</button>
+        <button type="button" class="secondary" id="mirrorGithubBtn">Mirror to local</button>
+      </div>
+      <div class="status" id="taxonomySyncStatus">Using local YAML.</div>
+      <div id="taxonomySyncMessage" class="message hidden"></div>
+      <div class="panel-section">
+        <strong class="panel-title">Synced preview</strong>
+        <div class="status">Read-only cache from the last GitHub sync. Use Mirror to local to copy it into labels.yaml.</div>
+        <div id="githubTaxonomyPreview" class="item-list"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-model">
+      <div class="panel-head">
+        <div>
+          <strong class="panel-title">Model settings</strong>
+          <div class="status">Inference provider, thresholds, and active taxonomy source.</div>
+        </div>
+      </div>
+      <div class="row">
+        <label>Provider
+          <select id="provider">
+            <option value="ollama" selected>ollama</option>
+            <option value="openai">openai</option>
+          </select>
+        </label>
+        <label>Model
+          <select id="modelSelect" class="wide">
+            <option value="qwen3.5:9b" selected>qwen3.5:9b</option>
+            <option value="llama3.1:8b">llama3.1:8b</option>
+            <option value="mistral:7b">mistral:7b</option>
+          </select>
+        </label>
+        <label>Temperature
+          <input id="temperature" type="number" min="0" max="2" step="0.1" value="0.1" />
+        </label>
+        <label>Confidence threshold
+          <input id="confidenceThreshold" type="number" min="0" max="1" step="0.01" value="0.8" />
+        </label>
+      </div>
+      <div class="panel-section">
+        <strong class="panel-title">Taxonomy mode</strong>
+        <div class="status">Local YAML and GitHub-synced labels share the same pipeline. Default operating mode is GitHub sync.</div>
+        <div class="row">
+          <label>Source
+            <select id="taxonomySource">
+              <option value="local">Local</option>
+              <option value="github" selected>GitHub</option>
+            </select>
+          </label>
+          <label class="grow">GitHub repo
+            <input id="githubRepo" class="wide" value="example-org/support-issues" />
+          </label>
+        </div>
+      </div>
+      <div class="row">
+        <button type="button" id="saveModelBtn">Save model &amp; reload</button>
+        <button type="button" class="secondary" id="refreshModelsBtn">Refresh Ollama models</button>
+      </div>
+      <div id="modelMessage" class="message hidden"></div>
+    </section>
+
+    <section class="panel" id="panel-test">
+      <div class="panel-head">
+        <div>
+          <strong class="panel-title">Test labelling</strong>
+          <div class="status">Pick a scenario, then run. Labels and confidence are prewritten.</div>
+        </div>
+      </div>
+      <div class="row">
+        <label>Scenario
+          <select id="scenarioSelect" class="wide">
+            <option value="sso">Clear bug · SSO login</option>
+            <option value="export">Clear bug · missing export control</option>
+            <option value="vague">Low confidence · needs human review</option>
+          </select>
+        </label>
+        <label>Ticket ID
+          <input id="testTicketId" value="demo-101" />
+        </label>
+      </div>
+      <div class="row">
+        <label class="grow">Title
+          <input id="testTitle" />
+        </label>
+      </div>
+      <label class="block">Body
+        <textarea id="testBody"></textarea>
+      </label>
+      <p class="preset-note">
+        Issue text is invented. Nothing from the partner backlog.
+      </p>
+      <div class="row">
+        <button type="button" id="testClassifyBtn">Run test labelling</button>
+      </div>
+      <div id="testResult" class="hidden"></div>
+      <div id="testMessage" class="message hidden"></div>
+    </section>
+  </main>
+
+  <script>
+    const taxonomy = [
+      {
+        id: "type-bug",
+        name: "Type: Bug",
+        description: "Software defect: incorrect behavior, errors, or crashes.",
+        color: "d73a4a",
+      },
+      {
+        id: "type-feature",
+        name: "Type: Feature Request",
+        description: "New capability or enhancement request.",
+        color: "0e8a16",
+      },
+      {
+        id: "type-question",
+        name: "Type: Question",
+        description: "How-to or clarification, not a defect.",
+        color: "1d76db",
+      },
+      {
+        id: "workflow-triage",
+        name: "Workflow: Needs Triage",
+        description: "Issue still needs routing or ownership.",
+        color: "fbca04",
+      },
+      {
+        id: "area-auth",
+        name: "Area: Authentication",
+        description: "Login, SSO, sessions, password reset.",
+        color: "5319e7",
+      },
+      {
+        id: "area-reporting",
+        name: "Area: Reporting",
+        description: "Exports, dashboards, scheduled reports.",
+        color: "006b75",
+      },
+      {
+        id: "ui-discrepancy",
+        name: "UI Discrepancy",
+        description: "Visible UI does not match expected layout or controls.",
+        color: "c5def5",
+      },
+      {
+        id: "needs-human-review",
+        name: "Needs Human Review",
+        description: "Appended by the service when confidence or cardinality rules fail.",
+        color: "fbca04",
+      },
+    ];
+
+    // Synthetic GitHub sync cache (demo only). Slightly richer than local YAML.
+    let githubLabels = [
+      ...taxonomy,
+      {
+        id: "area-notifications",
+        name: "Area: Notifications",
+        description: "Email and in-app notification delivery.",
+        color: "bfd4f2",
+      },
+      {
+        id: "performance",
+        name: "Performance",
+        description: "Slow pages, timeouts, or heavy queries.",
+        color: "f9d0c4",
+      },
+    ];
+
+    let lastSyncedAt = new Date("2026-08-05T18:42:00Z");
+    let syncAvailable = true;
+
+    const scenarios = {
+      sso: {
+        ticket_id: "demo-101",
+        title: "Cannot login with SSO after password reset",
+        body: "Users who reset their password hit a session timeout loop when signing in with SSO. Happens on Chrome and Edge.",
+        result: {
+          ticket_id: "demo-101",
+          labels: ["Type: Bug", "Area: Authentication", "Workflow: Needs Triage"],
+          label_colors: ["d73a4a", "5319e7", "fbca04"],
+          confidence: 0.94,
+          review_flag: false,
+          explanation:
+            "Title and body describe a login/SSO defect after password reset, so Type: Bug and Area: Authentication fit. Workflow: Needs Triage stays until someone owns the fix.",
+        },
+      },
+      export: {
+        ticket_id: "demo-214",
+        title: "CSV export control missing from weekly report view",
+        body: "After yesterday's deploy, the export button no longer appears on the weekly report page. Print still works.",
+        result: {
+          ticket_id: "demo-214",
+          labels: ["Type: Bug", "Area: Reporting", "UI Discrepancy"],
+          label_colors: ["d73a4a", "006b75", "c5def5"],
+          confidence: 0.91,
+          review_flag: false,
+          explanation:
+            "A missing export control on a report view is a regression in reporting UI, so Type: Bug, Area: Reporting, and UI Discrepancy apply.",
+        },
+      },
+      vague: {
+        ticket_id: "demo-308",
+        title: "Something is wrong",
+        body: "Please fix soon. It broke yesterday. Not sure which screen.",
+        result: {
+          ticket_id: "demo-308",
+          labels: ["Type: Question", "Workflow: Needs Triage", "Needs Human Review"],
+          label_colors: ["1d76db", "fbca04", "fbca04"],
+          confidence: 0.41,
+          review_flag: true,
+          explanation:
+            "The issue does not name a product area or reproducible defect. Confidence is below threshold, so Needs Human Review is appended.",
+        },
+      },
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function showMessage(el, text, ok = true) {
+      el.textContent = text;
+      el.classList.toggle("warn", !ok);
+      el.classList.remove("hidden");
+      window.clearTimeout(el._hideTimer);
+      el._hideTimer = window.setTimeout(() => el.classList.add("hidden"), 2600);
+    }
+
+    function updateGithubStatus() {
+      const source = $("taxonomySource").value;
+      const repo = ($("githubRepo").value || "").trim() || "(unset)";
+      $("githubLabelsRepo").value = ($("githubRepo").value || "").trim();
+      $("taxonomyGithubBanner").classList.toggle("hidden", source !== "github");
+
+      if (source !== "github") {
+        $("taxonomySyncStatus").textContent =
+          "Labelling is on Local mode (Model tab). Preview below is inactive until Source=GitHub.";
+        return;
+      }
+      if (!syncAvailable || !lastSyncedAt) {
+        $("taxonomySyncStatus").textContent =
+          "GitHub mode active. Not yet synced. Click Sync now.";
+        return;
+      }
+      $("taxonomySyncStatus").textContent =
+        `Labelling uses flat GitHub labels · last synced ${lastSyncedAt.toLocaleString()} · repo ${repo}`;
+    }
+
+    function renderGithubPreview() {
+      const container = $("githubTaxonomyPreview");
+      if (!syncAvailable) {
+        container.innerHTML = `<div class="empty">No synced image yet. Click Sync now.</div>`;
+        return;
+      }
+      const items = githubLabels;
+      container.innerHTML = `
+        <div class="taxonomy-list-meta"><strong>${items.length}</strong><span>labels in sync cache</span></div>
+        <div class="compact-list-head"><span></span><span>Name</span><span>ID</span><span>Description</span></div>
+        ${items
+          .map(
+            (item) => `
+          <div class="github-preview-row">
+            <span class="summary-swatch" style="background:#${escapeHtml(item.color)}"></span>
+            <span class="summary-name">${escapeHtml(item.name)}</span>
+            <span class="summary-id">${escapeHtml(item.id)}</span>
+            <span class="summary-desc">${escapeHtml(item.description)}</span>
+          </div>`
+          )
+          .join("")}`;
+    }
+
+    function syncGithub() {
+      const message = $("taxonomySyncMessage");
+      const source = $("taxonomySource").value;
+      const repo = ($("githubRepo").value || "").trim();
+
+      if (source !== "github") {
+        showMessage(
+          message,
+          "Taxonomy mode is Local. Set Source to GitHub on the Model tab and save, then sync.",
+          false
+        );
+        return;
+      }
+      if (!repo) {
+        showMessage(message, "Set a GitHub repo on the Model tab and save first.", false);
+        return;
+      }
+
+      lastSyncedAt = new Date();
+      syncAvailable = true;
+      // Fake a small sync delta so the click does something visible.
+      if (!githubLabels.some((item) => item.id === "docs")) {
+        githubLabels = [
+          ...githubLabels,
+          {
+            id: "docs",
+            name: "Docs",
+            description: "Documentation gaps or incorrect help text.",
+            color: "0075ca",
+          },
+        ];
+      }
+      renderGithubPreview();
+      updateGithubStatus();
+      showMessage(message, `ok · ${githubLabels.length} labels synced from ${repo}`);
+    }
+
+    function mirrorGithub() {
+      const message = $("taxonomySyncMessage");
+      if (!syncAvailable) {
+        showMessage(message, "Nothing to mirror. Sync GitHub labels first.", false);
+        return;
+      }
+      const confirmed = window.confirm(
+        "Replace local labels.yaml with the current GitHub sync cache? This overwrites local taxonomy."
+      );
+      if (!confirmed) return;
+
+      taxonomy.length = 0;
+      githubLabels.forEach((item) => taxonomy.push({ ...item }));
+      renderTaxonomy($("taxonomySearch").value);
+      showMessage(
+        message,
+        `Mirrored ${githubLabels.length} labels into local YAML. Switch Source to Local on the Model tab to use them.`
+      );
+    }
+
+    function renderTaxonomy(filter = "") {
+      const q = filter.trim().toLowerCase();
+      const list = taxonomy.filter((item) => {
+        if (!q) return true;
+        return [item.id, item.name, item.description].join(" ").toLowerCase().includes(q);
+      });
+      $("taxonomyItems").innerHTML = list
+        .map(
+          (item) => `
+        <article class="item">
+          <div class="item-top">
+            <div class="item-name">
+              <span class="swatch" style="background:#${escapeHtml(item.color)}"></span>
+              ${escapeHtml(item.name)}
+            </div>
+            <div class="item-meta">${escapeHtml(item.id)}</div>
+          </div>
+          <div class="item-desc">${escapeHtml(item.description)}</div>
+        </article>`
+        )
+        .join("");
+    }
+
+    function applyScenario(key) {
+      const scenario = scenarios[key] || scenarios.sso;
+      $("testTicketId").value = scenario.ticket_id;
+      $("testTitle").value = scenario.title;
+      $("testBody").value = scenario.body;
+      $("testResult").classList.add("hidden");
+      $("testMessage").classList.add("hidden");
+    }
+
+    function chips(values, colors) {
+      return values
+        .map((value, index) => {
+          const color = colors[index];
+          const swatch = color
+            ? `<span class="summary-swatch" style="background:#${escapeHtml(color)}"></span>`
+            : "";
+          return `<span class="chip">${swatch}${escapeHtml(value)}</span>`;
+        })
+        .join("");
+    }
+
+    function runTest() {
+      const key = $("scenarioSelect").value;
+      const base = scenarios[key] || scenarios.sso;
+      const payload = {
+        ...base.result,
+        ticket_id: $("testTicketId").value || base.result.ticket_id,
+      };
+      const source = $("taxonomySource").value;
+      const banner =
+        source === "github"
+          ? "GitHub source: flat repo labels (exactly one Type: required)."
+          : "Local source: flat prefixed labels (exactly one Type: required).";
+      const reviewNote = payload.review_flag
+        ? '<div class="message warn" style="margin-top:0.75rem">review_flag is true. Service appended Needs Human Review.</div>'
+        : "";
+
+      $("testResult").innerHTML = `
+        <div class="status">${banner}</div>
+        <div class="result-grid">
+          <div class="result-box"><div class="label">Ticket ID</div><div class="value">${escapeHtml(payload.ticket_id)}</div></div>
+          <div class="result-box"><div class="label">Confidence</div><div class="value">${Number(payload.confidence).toFixed(3)}</div></div>
+          <div class="result-box"><div class="label">Review flag</div><div class="value">${payload.review_flag ? "Yes" : "No"}</div></div>
+        </div>
+        <div class="result-box" style="margin-top:0.5rem">
+          <div class="label">Labels</div>
+          <div class="chip-row">${chips(payload.labels, payload.label_colors)}</div>
+        </div>
+        <div class="result-box" style="margin-top:0.5rem">
+          <div class="label">Explanation</div>
+          <div class="value normal">${escapeHtml(payload.explanation)}</div>
+        </div>
+        ${reviewNote}`;
+      $("testResult").classList.remove("hidden");
+      $("testMessage").classList.add("hidden");
+    }
+
+    document.querySelectorAll(".tabs button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tabs button").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        $("panel-" + btn.dataset.tab).classList.add("active");
+      });
+    });
+
+    $("taxonomySearch").addEventListener("input", (e) => renderTaxonomy(e.target.value));
+    $("saveTaxonomyBtn").addEventListener("click", () =>
+      showMessage($("taxonomyMessage"), "Save is mocked in this demo.")
+    );
+    $("saveModelBtn").addEventListener("click", () => {
+      updateGithubStatus();
+      showMessage(
+        $("modelMessage"),
+        `Save is mocked. Would keep ${$("provider").value}/${$("modelSelect").value}, source=${$("taxonomySource").value}.`
+      );
+    });
+    $("refreshModelsBtn").addEventListener("click", () =>
+      showMessage($("modelMessage"), "Model list is fixed in this demo.")
+    );
+    $("taxonomySource").addEventListener("change", updateGithubStatus);
+    $("githubRepo").addEventListener("input", () => {
+      $("githubLabelsRepo").value = $("githubRepo").value;
+      updateGithubStatus();
+    });
+    $("syncGithubBtn").addEventListener("click", syncGithub);
+    $("mirrorGithubBtn").addEventListener("click", mirrorGithub);
+    $("scenarioSelect").addEventListener("change", (e) => applyScenario(e.target.value));
+    $("testClassifyBtn").addEventListener("click", runTest);
+
+    renderTaxonomy();
+    renderGithubPreview();
+    updateGithubStatus();
+    applyScenario("sso");
+  </script>
+</body>
+</html>

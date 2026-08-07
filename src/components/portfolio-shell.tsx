@@ -44,7 +44,10 @@ const isImageHref = (href: string) => /\.(png|jpg|jpeg|svg|webp|gif|avif)$/i.tes
 /** Interactive HTML demos use a widescreen viewer; PDFs/slides/notebooks stay tall. */
 function isWebDemoFile(file: { href: string; icon?: string }) {
   if (file.icon === "window") return true;
-  return /\.html?$/i.test(file.href) && /(lending_form|sign-in|ai-grading-system)/i.test(file.href);
+  return (
+    /\.html?$/i.test(file.href) &&
+    /(lending_form|sign-in|ai-grading-system|ticket_labeller)/i.test(file.href)
+  );
 }
 
 function readThemeSnapshot(): "light" | "dark" {
@@ -67,10 +70,24 @@ function subscribeToTheme(callback: () => void) {
   };
 }
 
+function broadcastThemeToFrames(next: "light" | "dark") {
+  document.querySelectorAll("iframe").forEach((frame) => {
+    try {
+      frame.contentWindow?.postMessage(
+        { type: "portfolio-theme", theme: next },
+        window.location.origin,
+      );
+    } catch {
+      /* cross-origin or unloaded frame */
+    }
+  });
+}
+
 function setTheme(next: "light" | "dark") {
   try {
     window.localStorage.setItem(themeStorageKey, next);
     window.dispatchEvent(new Event("portfolio-theme-change"));
+    broadcastThemeToFrames(next);
   } catch {}
 }
 
@@ -642,7 +659,7 @@ export function PortfolioShell() {
             </header>
             <div className="contact-block">
               <p>
-                Open to opportunities, collaborations, or conversations about data, AI, and economics.
+                Open to new work, collaborations, or a chat about data, AI, and economics.
               </p>
               <div className="contact-links">
                 {socialLinks.map((link) => (
@@ -859,6 +876,16 @@ export function PortfolioShell() {
                       : activeFileViewer.href
                   }
                   className="min-h-0 flex-1 border-0 bg-[var(--color-paper)]"
+                  onLoad={(event) => {
+                    try {
+                      event.currentTarget.contentWindow?.postMessage(
+                        { type: "portfolio-theme", theme },
+                        window.location.origin,
+                      );
+                    } catch {
+                      /* ignore */
+                    }
+                  }}
                 />
               )}
             </motion.div>

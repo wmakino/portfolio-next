@@ -1,6 +1,12 @@
 type StackIcon = { src: string; label: string };
 
 const clusters: Record<string, StackIcon[]> = {
+  "ticket-labeller": [
+    { src: "/images/stack/python.svg", label: "Python" },
+    { src: "/images/stack/fastapi.svg", label: "FastAPI" },
+    { src: "/images/stack/ollama.svg", label: "Ollama / Qwen" },
+    { src: "/images/stack/microsoftazure.svg", label: "Azure" },
+  ],
   "cursor-hackathon": [
     { src: "/images/stack/cursor.svg", label: "Cursor" },
     { src: "/images/stack/google.svg", label: "Google Auth" },
