@@ -550,7 +550,7 @@ export function PortfolioShell() {
             <header className="section-head">
               <span className="section-head__num">01</span>
               <h2>Skills</h2>
-              <p>Modeling, analytics, and shipping interfaces.</p>
+              <p>Modeling, analytics, shipping, and the ops after launch.</p>
             </header>
             <div className="index-stack">
               {skillGroups.map((group, index) => (
