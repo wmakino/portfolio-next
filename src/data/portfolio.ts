@@ -132,7 +132,7 @@ export const timelineItems: TimelineItem[] = [
   {
     slug: "integrated-ai",
     type: "education",
-    period: "Aug 2026",
+    period: "Jan 2026 - Aug 2026",
     title: "Integrated AI Post-diploma Certificate",
     institution: "Southern Alberta Institute of Technology (SAIT)",
     accolade: "Honours",
@@ -176,7 +176,7 @@ export const timelineItems: TimelineItem[] = [
   {
     slug: "data-analytics",
     type: "education",
-    period: "Dec 2025",
+    period: "May 2025 - Dec 2025",
     title: "Data Analytics Post-diploma Certificate",
     institution: "Southern Alberta Institute of Technology (SAIT)",
     location: "Calgary, Alberta",
@@ -214,7 +214,7 @@ export const timelineItems: TimelineItem[] = [
   {
     slug: "econ-degree",
     type: "education",
-    period: "Dec 2024",
+    period: "Mar 2019 - Dec 2024",
     title: "Bachelor in Economic Sciences (BSc)",
     institution: "University of Campinas (UNICAMP)",
     location: "Campinas, São Paulo",
