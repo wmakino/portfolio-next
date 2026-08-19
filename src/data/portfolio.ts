@@ -32,6 +32,7 @@ export type ProjectItem = {
   slug: string;
   title: string;
   category: string;
+  period: string;
   summary: string;
   details: string[];
   tags: string[];
@@ -94,7 +95,7 @@ export const skillGroups: SkillGroup[] = [
   {
     title: "Data Analytics & Strategy",
     description: "SQL, statistics, and BI tools for analysis and reporting.",
-    items: ["SQL", "Power BI", "Excel", "Statistics", "Predictive Analytics", "Time Series"],
+    items: ["SQL", "R", "Power BI", "Excel", "Statistics", "Predictive Analytics", "Time Series", "GeoPandas"],
   },
   {
     title: "Software & Cloud",
@@ -131,11 +132,11 @@ export const timelineItems: TimelineItem[] = [
   {
     slug: "integrated-ai",
     type: "education",
-    period: "Jan 2026 - Aug 2026",
+    period: "Aug 2026",
     title: "Integrated AI Post-diploma Certificate",
     institution: "Southern Alberta Institute of Technology (SAIT)",
-    accolade: "in progress",
-    accoladeVariant: "in-progress",
+    accolade: "Honours",
+    accoladeVariant: "honours",
     location: "Calgary, Alberta",
     country: "CA",
     logo: {
@@ -143,7 +144,7 @@ export const timelineItems: TimelineItem[] = [
       dark: "/images/logos/sait_core_vertical_reverse_v2.png",
     },
     summary:
-      "One-year post-diploma at SAIT: applied AI from modeling through deployment, plus the business and management side of running AI systems in production.",
+      "One-year post-diploma at SAIT (GPA 4.0, Honours): applied AI from modeling through deployment, plus the business and management side of running AI systems in production.",
     details: [
       "Overview: SAIT's Integrated Artificial Intelligence certificate is 30 credits. It starts with stats and predictive modeling, then moves into NLP, computer vision, and generative AI (LLMs, fine-tuning, prompt design, agents with memory). Governance, human-centered design, and post-launch ops sit in the same curriculum as the modeling courses.",
       "You train models, connect them to apps, and learn how to keep them running in production. Web and cloud courses cover deployment (compute, security, migration). Ethics, compliance, explainability, monitoring, tuning, and maintenance appear throughout. Governance and management classes cover the business side. The capstone is a client project with a working deliverable and a written case for it.",
@@ -175,7 +176,7 @@ export const timelineItems: TimelineItem[] = [
   {
     slug: "data-analytics",
     type: "education",
-    period: "May 2025 - Dec 2025",
+    period: "Dec 2025",
     title: "Data Analytics Post-diploma Certificate",
     institution: "Southern Alberta Institute of Technology (SAIT)",
     location: "Calgary, Alberta",
@@ -185,7 +186,7 @@ export const timelineItems: TimelineItem[] = [
       light: "/images/logos/sait_core_vertical_full_colour_rgb_v2.png",
       dark: "/images/logos/sait_core_vertical_reverse_v2.png",
     },
-    summary: "24-credit program from SQL and ETL through visualization, modeling, and a business capstone.",
+    summary: "24-credit program (GPA 4.0, Honours) from SQL and ETL through visualization, modeling, and a business capstone.",
     details: [
       "Overview: SAIT's Data Analytics post-diploma is 24 credits. Early courses cover data literacy, SQL, ETL, and statistics. Later ones add predictive modeling, BI reporting, and more advanced analytics topics.",
       "Machine learning, deep learning, and cloud/IoT land in the second semester. The capstone is an industry case where you clean messy data, analyze it, and present findings to the class.",
@@ -213,7 +214,7 @@ export const timelineItems: TimelineItem[] = [
   {
     slug: "econ-degree",
     type: "education",
-    period: "Mar 2019 - Dec 2024",
+    period: "Dec 2024",
     title: "Bachelor in Economic Sciences (BSc)",
     institution: "University of Campinas (UNICAMP)",
     location: "Campinas, São Paulo",
@@ -304,24 +305,52 @@ export const timelineItems: TimelineItem[] = [
     period: "Nov 2025 - Dec 2025",
     title: "Computing Solutions Advisor (Seasonal)",
     location: "Best Buy Canada",
+    country: "CA",
     summary: "Holiday contract in Best Buy's computing department: consultative sales during Black Friday and Boxing Day rushes.",
     details: [
-      "Covered the computing floor during peak holiday traffic (Black Friday and Boxing Day). Volume was high; the job was matching people to the right gear without rushing them off.",
-      "Explained specs and trade-offs to customers who ranged from first-time buyers to people upgrading custom builds.",
-      "Got better at translating jargon into plain language and staying calm when three conversations needed attention at once.",
+      "Seasonal Computing-floor role in Calgary through the holiday rush, when several conversations were open at once.",
+      "Responsibilities: ",
+      "• Matched laptops, desktops, and accessories to the actual job: gaming, school, or work-from-home.",
+      "• Explained CPU, RAM, storage, and OS trade-offs in plain language so first-time buyers and people upgrading custom builds could decide without a spec sheet.",
+      "• Kept the floor moving when three customers needed attention at the same time.",
+      "Scope: Two-month holiday contract covering Black Friday and Boxing Day peak traffic.",
     ],
     tags: ["Technical Sales", "Client Relations", "Merchandising", "Multitasking", "Attention to Detail", "B2C Sales"],
+  },
+  {
+    slug: "ecommerce-founder",
+    type: "work",
+    period: "Jul 2019 - Mar 2025",
+    title: "Founder / PC Builder / E-Commerce Operator",
+    location: "Self Employed, Campinas",
+    country: "BR",
+    summary:
+      "Small electronics and PC-parts shop in Campinas: sourcing, listings, sales, shipping, and custom builds.",
+    details: [
+      "One-person electronics and PC-parts shop in Campinas, run alongside the economics degree from 2019 to 2025.",
+      "Responsibilities: ",
+      "• Sourced parts, wrote listings, took payment, packed orders, and answered buyers.",
+      "• Built and tested custom PCs: component list, assembly, and a power-on check before handover.",
+      "• In-person sales, maintenance, and support when a listing was not enough.",
+      "Scope: About 300 to 400 sales over five years. Around 15 client PCs from the parts list through assembly and testing.",
+    ],
+    tags: ["E-Commerce", "PC Assembly", "Sourcing", "Customer Support", "B2C Sales"],
   },
   {
     slug: "tech-tutor",
     type: "work",
     period: "Jul 2024 - Mar 2025",
     title: "Private Technology Coach/Tutor",
-    location: "Self Employed",
-    summary: "Private tutoring for older adults on phones, email, Windows, and everyday digital tasks.",
+    location: "Self Employed, Campinas",
+    country: "BR",
+    summary: "Private tutoring in Campinas for older adults on phones, email, Windows, and everyday digital tasks.",
     details: [
-      "One-on-one sessions with older adults on Windows, iOS/Android, email, browsing, and account setup.",
-      "Most clients needed patience more than technical depth: repeating steps, writing things down, and building confidence with devices they already owned.",
+      "One-on-one digital literacy coaching for older adults in Campinas. Most clients already owned the devices.",
+      "Responsibilities: ",
+      "• Taught Windows, smartphones, email, and safe browsing, repeating steps and writing them down until the task stuck.",
+      "• Walked through account setup, troubleshooting, password managers, video calls, and online banking.",
+      "• Stayed until they could run the path without me, rather than handing off a checklist.",
+      "Scope: Nine months of 1:1 sessions, Jul 2024 to Mar 2025.",
     ],
     tags: ["1:1 Instruction", "System Troubleshooting", "Windows OS", "Mobile Platforms", "Cybersecurity Basics", "Digital Literacy"],
   },
@@ -427,19 +456,21 @@ export const certificationItems: CertificationItem[] = [
 export const projectItems: ProjectItem[] = [
   {
     slug: "ticket-labeller",
-    title: "EMR Ticket Labeller & Theme Clustering",
+    title: "Tagmatic: Ticket Labelling & Theme Discovery",
     category: "SAIT Integrated AI Capstone · Ava Industries",
+    period: "Aug 2026",
     summary:
-      "FastAPI + Qwen labeller for Ava Industries GitHub issues, with theme clustering on Azure and a review flag when label rules break.",
+      "FastAPI + Qwen labeller and HDBSCAN theme discovery for Ava Industries GitHub issues, on Azure, with Needs Human Review when Type/Workflow/Area rules break.",
     details: [
-      "Overview: PROJ-407 Integrated AI capstone with a team of four for Ava Industries in Calgary, the company behind Ava EMR. Our piece labels GitHub issues for their developers, not patient charts or clinical workflows. Build is done; presentation is next. I owned the FastAPI labeller API, theme clustering, and Azure/Qwen deploy. Teammates owned the ticket-filling chatbot, an auto PRD generator, and the GitHub Actions that call the API.",
-      "Problem: Developers carry a large GitHub issue backlog and a long label list. Hand-labelling is slow and drifts between people. Broken Type/Workflow/Area combinations need a review flag. The team also wanted unsupervised themes the fixed taxonomy misses.",
-      "Approach: FastAPI asks Ollama/Qwen for structured JSON labels against a flat, prefix-coded taxonomy. Person names and clinic-like orgs are redacted from the prompt only. Code then keeps one Type, at most one Workflow, and at most one Area, and appends Needs Human Review when those counts break. Confidence is stored but does not trip the flag. Local YAML and GitHub-synced taxonomies use the same pipeline. Admin SPA handles settings and live test labelling. Clustering shares one embed / UMAP / HDBSCAN path for the API and the script. Ran on Azure Container Apps with Qwen.",
-      "Results: 100+ labels in the taxonomy. 2,700+ issues labelled. Capstone build finished; presentation still pending.",
-      "Stack: Python, FastAPI, Ollama/Qwen, embeddings, UMAP, HDBSCAN, YAML taxonomy, Azure Container Apps, Docker, admin SPA.",
+      "Overview: PROJ-407 Integrated AI capstone with a team of four for Ava Industries in Calgary, the company behind Ava EMR. Tagmatic labels GitHub issues for their developers, not patient charts. I owned the FastAPI labeller, prompt-side PII redaction, theme clustering, and the Qwen/Ollama labeller container on Azure. Barbara led and built PRD automation. Nehal built the RAG chatbot. Ludwig owned system architecture. GitHub Actions call the API and write labels back.",
+      "Problem: 2,793 development tickets, a 98-label taxonomy, and no scalable way to triage or see related work. Hand-labelling drifted. Type, Workflow, and Area combinations broke. The list also missed themes that only show up once you cluster the backlog.",
+      "Approach: FastAPI asks qwen3.5:9b for structured JSON against Ava's GitHub labels. spaCy NER plus regex replace names, emails, phones, URLs, and clinic orgs in the prompt only. A JSON schema locks the reply to (Label for AI) ids. Python then keeps exactly one Type, at most one Workflow, and at most one Area. If Type is missing or extras were dropped, the Action applies Needs Human Review and nothing else. Confidence is stored and does not set the flag. Clustering is a separate job: nomic-embed-text, UMAP, leaf HDBSCAN, then TF-IDF plus LLM names with an (AI Cluster) description. ModernBERT cosine matching came first and could not enforce those counts, so we switched to a model that returns JSON.",
+      "Results: 2,793 open and closed issues labelled with qwen3.5:9b in about 60 minutes (1.29 s/ticket). The 4b sibling finished in 41 minutes; Azure bills T4 uptime, so the extra ~40 seconds per 100 tickets did not move the bill and we shipped 9b. Redaction hit 1,746 tickets before the prompt. Clustering found 36 themes. 63.7% of tickets landed in one; the rest stayed noise on purpose. No gold set, so review rate and self-reported confidence are not accuracy.",
+      "Stack: Python, FastAPI, Ollama/Qwen 3.5 9B, spaCy, embeddings, UMAP, HDBSCAN, YAML taxonomy, Azure Container Apps, Docker, admin SPA.",
     ],
     tags: ["FastAPI", "LLMs", "Ollama/Qwen", "Azure", "UMAP", "HDBSCAN", "Human-in-the-loop", "PII Redaction", "Python"],
     files: [
+      { label: "Presentation Slides", href: "/projects/ticket_labeller/Tagmatic_Presentation.pdf", icon: "presentation" },
       { label: "Admin UI Demo", href: "/projects/ticket_labeller/admin.html", icon: "window" },
       { label: "System Diagram", href: "/projects/ticket_labeller/diagram.html", icon: "image" },
     ],
@@ -448,6 +479,7 @@ export const projectItems: ProjectItem[] = [
     slug: "cursor-hackathon",
     title: "Smart Inbox (Cursor Hackathon)",
     category: "Hackathon Product Prototype",
+    period: "May 2026",
     summary:
       "24-hour hackathon build: Gmail triage mockup with sorted buckets, urgency counts, sign-in flow, and a dense priority dashboard.",
     details: [
@@ -466,6 +498,7 @@ export const projectItems: ProjectItem[] = [
     slug: "credit-risk-analysis",
     title: "Credit Risk Analysis & Deployment",
     category: "DATA-440 & ARTI-404 Final Project",
+    period: "Apr 2026",
     summary:
       "Dual final project: train a credit-risk classifier with EDA and tuning, then ship it through a Flask app with a lending form, live scores, and SHAP explanations.",
     details: [
@@ -487,6 +520,7 @@ export const projectItems: ProjectItem[] = [
     slug: "ai-grading-system",
     title: "Human-Centered AI Grading",
     category: "ARTI-406 Final Project",
+    period: "Apr 2026",
     summary:
       "Design and HTML mockup for AI-assisted grading: instructors set the rubric and rigor, then approve every score and comment before it posts.",
     details: [
@@ -506,6 +540,7 @@ export const projectItems: ProjectItem[] = [
     slug: "capcon-ev-analysis",
     title: "Canada EV Infrastructure",
     category: "Data Analytics Capstone",
+    period: "Dec 2025",
     summary:
       "Academic capstone framed as an NRCan / ZEVIP brief (real program, fictional engagement): geospatial analysis, Monte Carlo budget runs, and demand forecasts for EV chargers across Canada.",
     details: [
@@ -527,6 +562,7 @@ export const projectItems: ProjectItem[] = [
     slug: "daan-statistical-analysis",
     title: "2024 F1 Season Analysis",
     category: "DATA-415 Final Project",
+    period: "Aug 2025",
     summary:
       "2024 F1 analysis in Excel on OpenF1 data: qualifying vs race results, kNN tire-compound prediction, and Monte Carlo 1-stop vs 2-stop sims.",
     details: [
@@ -543,6 +579,7 @@ export const projectItems: ProjectItem[] = [
     slug: "daan-predictive-analytics",
     title: "NYC Rideshare Market Analysis",
     category: "DATA-420 Final Project",
+    period: "Aug 2025",
     summary:
       "NYC TLC FHV base aggregates in R (~52k monthly rows): trip volume vs fleet size, k-means on operator scale, and a tree that flags Uber/Lyft vs everyone else.",
     details: [
@@ -559,6 +596,7 @@ export const projectItems: ProjectItem[] = [
     slug: "monograph-capstone",
     title: "Monetary Financing & COVID-19",
     category: "CE-825 Final Project",
+    period: "2024",
     summary:
       "Year-long UNICAMP thesis comparing macro schools on Brazil's COVID-era monetary financing, backed by BCB and Treasury data.",
     details: [
@@ -578,6 +616,7 @@ export const projectItems: ProjectItem[] = [
     slug: "fortune-1000",
     title: "2024 Fortune 1000 Companies",
     category: "CE-874 Final Project",
+    period: "Nov 2024",
     summary:
       "Team project on ~795 Fortune 1000 firms: next-year revenue and rank checks with KNN, Random Forest, SVR, and MLP in Python.",
     details: [
@@ -594,6 +633,7 @@ export const projectItems: ProjectItem[] = [
     slug: "inss-covid-impact",
     title: "COVID-19 Impact Analysis of Brazil's Federal Revenues",
     category: "CE-442 Final Project",
+    period: "Jun 2023",
     summary:
       "Econometrics paper using SARIMA and intervention analysis to measure how COVID lockdowns cut Brazil's federal tax receipts compared to the pre-pandemic trend.",
     details: [

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ticket Labeller · System Diagram</title>
+  <title>Tagmatic · System Diagram</title>
   <script>
     (function () {
       var KEY = "portfolio-theme";
@@ -167,7 +167,7 @@
         Hub (issue/action) centered on y=148 between both lanes
       -->
       <svg viewBox="0 0 1160 348" role="img" aria-labelledby="diagTitle diagDesc">
-        <title id="diagTitle">Ticket Labeller flow</title>
+        <title id="diagTitle">Tagmatic flow</title>
         <desc id="diagDesc">
           Chatbot and auto PRD feed a GitHub issue. A GitHub Action then runs two parallel paths:
           taxonomy labelling through FastAPI, Qwen, and post-processing; and theme clustering with
@@ -389,7 +389,7 @@
           <div xmlns="http://www.w3.org/1999/xhtml" class="card">
             <span class="tag mine">Mine</span>
             <span class="title">Post-process</span>
-            <span class="sub">Rules + review flag</span>
+            <span class="sub">Cardinality + review flag</span>
           </div>
         </foreignObject>
 

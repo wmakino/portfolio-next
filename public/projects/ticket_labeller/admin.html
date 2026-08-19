@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ticket Labeller · Admin Demo</title>
+  <title>Tagmatic · Admin Demo</title>
   <script>
     (function () {
       var KEY = "portfolio-theme";
@@ -399,7 +399,7 @@
     <div class="masthead-inner">
       <div>
         <div class="brand-row">
-          <h1 class="brand-mark">Ticket Labeller</h1>
+          <h1 class="brand-mark">Tagmatic</h1>
           <span class="brand-role">Admin</span>
         </div>
         <div class="status">Static demo. Fake issue text only.</div>
@@ -521,7 +521,7 @@
           <select id="scenarioSelect" class="wide">
             <option value="sso">Clear bug · SSO login</option>
             <option value="export">Clear bug · missing export control</option>
-            <option value="vague">Low confidence · needs human review</option>
+            <option value="vague">No Type · needs human review</option>
           </select>
         </label>
         <label>Ticket ID
@@ -594,7 +594,7 @@
       {
         id: "needs-human-review",
         name: "Needs Human Review",
-        description: "Appended by the service when confidence or cardinality rules fail.",
+        description: "Applied alone when Type is missing or extra Workflow/Area labels were dropped.",
         color: "fbca04",
       },
     ];
@@ -650,16 +650,16 @@
       },
       vague: {
         ticket_id: "demo-308",
-        title: "Something is wrong",
-        body: "Please fix soon. It broke yesterday. Not sure which screen.",
+        title: "Please look at this when you can",
+        body: "Not sure if this is a bug or a question. No screen name, no repro, no workflow.",
         result: {
           ticket_id: "demo-308",
-          labels: ["Type: Question", "Workflow: Needs Triage", "Needs Human Review"],
-          label_colors: ["1d76db", "fbca04", "fbca04"],
-          confidence: 0.41,
+          labels: ["Needs Human Review"],
+          label_colors: ["fbca04"],
+          confidence: 0.88,
           review_flag: true,
           explanation:
-            "The issue does not name a product area or reproducible defect. Confidence is below threshold, so Needs Human Review is appended.",
+            "No Type resolved from the title and body. GitHub gets Needs Human Review and nothing else. Confidence is stored and does not set the flag.",
         },
       },
     };
@@ -839,7 +839,7 @@
           ? "GitHub source: flat repo labels (exactly one Type: required)."
           : "Local source: flat prefixed labels (exactly one Type: required).";
       const reviewNote = payload.review_flag
-        ? '<div class="message warn" style="margin-top:0.75rem">review_flag is true. Service appended Needs Human Review.</div>'
+        ? '<div class="message warn" style="margin-top:0.75rem">review_flag is true. GitHub gets Needs Human Review and nothing else.</div>'
         : "";
 
       $("testResult").innerHTML = `

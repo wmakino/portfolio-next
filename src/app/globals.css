@@ -574,6 +574,14 @@ h3 {
   font-weight: 500;
 }
 
+.index-row__top .index-row__meta {
+  margin-top: 0;
+}
+
+.index-row__top + .index-row__title {
+  margin-top: 0.3rem;
+}
+
 .index-row__summary {
   margin: var(--space-sm) 0 0;
   color: var(--color-ink-2);

@@ -113,7 +113,7 @@ function isSectionLabel(prefix: string, isBullet: boolean): boolean {
   if (/^Semester .+$/i.test(label)) return true;
   if (/^Completed .+$/i.test(label)) return true;
   if (
-    /^(Problem|Approach|Results|Outcome|Stack|Notes|Context|Deliverables|Method|Build|Team|Ethics)$/i.test(
+    /^(Problem|Approach|Results|Outcome|Stack|Notes|Context|Deliverables|Method|Build|Team|Ethics|Role|Responsibilities|Operations|Scope|Duties)$/i.test(
       label,
     )
   ) {
@@ -619,7 +619,10 @@ export function PortfolioShell() {
                     <ProjectMark slug={project.slug} className="index-row__mark" />
                   </figure>
                   <div className="min-w-0">
-                    <p className="index-row__meta">{project.category}</p>
+                    <div className="index-row__top">
+                      <p className="index-row__meta">{project.category}</p>
+                      <span className="index-row__place">{project.period}</span>
+                    </div>
                     <h3 className="index-row__title">{project.title}</h3>
                     <p className="index-row__summary">{project.summary}</p>
                     <ul className="index-row__tags">
@@ -735,7 +738,9 @@ export function PortfolioShell() {
                   ) : null}
                   <div className="min-w-0">
                     <p className="cert-row__issued">
-                      {currentProject?.category ?? currentTimeline?.location}
+                      {currentProject
+                        ? `${currentProject.period} · ${currentProject.category}`
+                        : currentTimeline?.location}
                     </p>
                     <h3 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
                       {currentItem.title}
